@@ -31,6 +31,7 @@
     "build": "./scripts/build",
     "dev": "./scripts/dev",
     "lint": "./scripts/lint",
+    "make-assets": "./scripts/make-assets",
     "prettier": "prettier 'src/**/*.[tj]s'",
     "prettier:fix": "yarn prettier --write",
     "prettier:check": "yarn prettier --list-different",
@@ -103,23 +104,14 @@
     "transform": {
       ".*": "<rootDir>/resources/jest-preprocessor.js"
     },
-    "moduleFileExtensions": [
-      "ts",
-      "js"
-    ],
-    "setupFiles": [
-      "<rootDir>/resources/jest-setup.js"
-    ],
+    "moduleFileExtensions": ["ts", "js"],
+    "setupFiles": ["<rootDir>/resources/jest-setup.js"],
     "browser": false,
     "testEnvironment": "node",
-    "testPathDirs": [
-      "<rootDir>/src"
-    ],
+    "testPathDirs": ["<rootDir>/src"],
     "testRegex": "/__tests__/[^.]+-test.(t|j)s$"
   },
-  "files": [
-    "build"
-  ],
+  "files": ["build"],
   "engines": {
     "node": ">=8.6"
   }
