@@ -262,8 +262,8 @@ export class Aether<
     [pathIdentity: string]: number[];
   };
 
-  public readonly transformDependencyPlanIdsByFieldPathIdentity: {
-    [pathIdentity: string]: number[];
+  public readonly transformDependencyPlanIdByTransformPlanIdByFieldPathIdentity: {
+    [pathIdentity: string]: { [transformPlanId: number]: number };
   };
 
   public readonly returnRawValueByPathIdentity: {
@@ -393,7 +393,8 @@ export class Aether<
       [ROOT_PATH]: this.rootValuePlan.id,
     });
     this.sideEffectPlanIdsByPathIdentity = Object.create(null);
-    this.transformDependencyPlanIdsByFieldPathIdentity = Object.create(null);
+    this.transformDependencyPlanIdByTransformPlanIdByFieldPathIdentity =
+      Object.create(null);
     this.returnRawValueByPathIdentity = Object.create(null);
     this.groupIdsByPathIdentity = Object.assign(Object.create(null), {
       [ROOT_PATH]: [0],
@@ -781,12 +782,12 @@ export class Aether<
 
       let plan: ExecutablePlan | PolymorphicPlan;
       this.sideEffectPlanIdsByPathIdentity[pathIdentity] = [];
-      this.transformDependencyPlanIdsByFieldPathIdentity[pathIdentity] = [];
       if (typeof planResolver === "function") {
         const oldPlansLength = this.plans.length;
         const wgs = withGlobalState.bind(null, {
           aether: this,
           parentPathIdentity: path,
+          currentGraphQLType: fieldType,
         }) as <T>(cb: () => T) => T;
         const trackedArguments = wgs(() =>
           this.getTrackedArguments(objectType, field),
@@ -896,6 +897,50 @@ export class Aether<
       const newPlan = this.plans[i];
       // If the newPlan still exists, finalize it with respect to arguments (once only).
       if (newPlan != null && this.plans[newPlan.id] === newPlan) {
+        if (newPlan.hasSideEffects && sideEffectsPathIdentity != null) {
+          this.sideEffectPlanIdsByPathIdentity[sideEffectsPathIdentity].push(
+            newPlan.id,
+          );
+        }
+
+        if (newPlan instanceof __TransformPlan) {
+          const listPlan = newPlan.getListPlan();
+          const nestedParentPathIdentity =
+            newPlan.parentPathIdentity + `@${newPlan.id}[]`;
+          const wgs = withGlobalState.bind(null, {
+            aether: this,
+            parentPathIdentity: nestedParentPathIdentity,
+          }) as <T>(cb: () => T) => T;
+          const itemPlan = wgs(() => {
+            const __listItem = new __ItemPlan(listPlan);
+
+            // TODO: this is a hack; we should instead incorporate calculation into this.assignCommonAncestorPathIdentity()
+            __listItem.commonAncestorPathIdentity = nestedParentPathIdentity;
+
+            const listItem = listPlan.listItem?.(__listItem) ?? __listItem;
+            return newPlan.itemPlanCallback(listItem);
+          });
+
+          // For logging only
+          this.planIdByPathIdentity[nestedParentPathIdentity] = itemPlan.id;
+
+          if (
+            !this.transformDependencyPlanIdByTransformPlanIdByFieldPathIdentity[
+              newPlan.parentPathIdentity
+            ]
+          ) {
+            this.transformDependencyPlanIdByTransformPlanIdByFieldPathIdentity[
+              newPlan.parentPathIdentity
+            ] = Object.create(null);
+          }
+          this.transformDependencyPlanIdByTransformPlanIdByFieldPathIdentity[
+            newPlan.parentPathIdentity
+          ][
+            // TODO: if newPlan gets deduplicated, will this lookup be broken?
+            newPlan.id
+          ] = itemPlan.id;
+        }
+
         {
           const wgs = withGlobalState.bind(null, {
             aether: this,
@@ -907,32 +952,6 @@ export class Aether<
           });
         }
         assertArgumentsFinalized(newPlan);
-        if (newPlan.hasSideEffects && sideEffectsPathIdentity != null) {
-          this.sideEffectPlanIdsByPathIdentity[sideEffectsPathIdentity].push(
-            newPlan.id,
-          );
-        }
-        if (newPlan instanceof __TransformPlan && sideEffectsPathIdentity) {
-          const listPlan = newPlan.getListPlan();
-          const nestedParentPathIdentity =
-            sideEffectsPathIdentity + `@${newPlan.id}[]`;
-          const wgs = withGlobalState.bind(null, {
-            aether: this,
-            parentPathIdentity: nestedParentPathIdentity,
-          }) as <T>(cb: () => T) => T;
-          const itemPlan = wgs(() => {
-            const __listItem = new __ItemPlan(listPlan);
-            const listItem = listPlan.listItem?.(__listItem) ?? __listItem;
-            return newPlan.itemPlanCallback(listItem);
-          });
-
-          // For logging only
-          this.planIdByPathIdentity[nestedParentPathIdentity] = itemPlan.id;
-
-          this.transformDependencyPlanIdsByFieldPathIdentity[
-            sideEffectsPathIdentity
-          ].push(itemPlan.id);
-        }
       }
     }
   }
@@ -978,9 +997,9 @@ export class Aether<
         depth,
       );
     } else if (fieldType instanceof GraphQLList) {
-      if (!isLeaf) {
-        assertListCapablePlan(plan, pathIdentity);
-      }
+      // if (!isLeaf) {
+      //   assertListCapablePlan(plan, pathIdentity);
+      // }
       const nestedParentPathIdentity = pathIdentity + "[]";
       const nestedTreeNode: TreeNode = {
         fieldPathIdentity,
@@ -992,6 +1011,7 @@ export class Aether<
       treeNode.children.push(nestedTreeNode);
       const oldPlansLength = this.plans.length;
 
+      // TODO: transform?
       const listItemPlan = withGlobalState(
         { aether: this, parentPathIdentity: nestedParentPathIdentity },
         isListCapablePlan(plan)
@@ -1757,9 +1777,12 @@ export class Aether<
 
     // Mark all plans used in transforms as active.
     for (const pathIdentity in this
-      .transformDependencyPlanIdsByFieldPathIdentity) {
-      const planIds =
-        this.transformDependencyPlanIdsByFieldPathIdentity[pathIdentity];
+      .transformDependencyPlanIdByTransformPlanIdByFieldPathIdentity) {
+      const planIds = Object.values(
+        this.transformDependencyPlanIdByTransformPlanIdByFieldPathIdentity[
+          pathIdentity
+        ],
+      );
       for (const planId of planIds) {
         const plan = this.plans[planId];
         if (isDev) {
@@ -1987,6 +2010,63 @@ export class Aether<
           ? null
           : planResults.get(plan.commonAncestorPathIdentity, plan.id),
       );
+    }
+    if (plan instanceof __TransformPlan) {
+      // __TransformPlan gets custom execution.
+      console.log(`${plan} - ${plan.parentPathIdentity}`);
+      const itemPlanId =
+        this.transformDependencyPlanIdByTransformPlanIdByFieldPathIdentity[
+          plan.parentPathIdentity
+        ][plan.id];
+      const itemPlan = this.dangerouslyGetPlan(itemPlanId);
+      const namedReturnType = plan.namedType;
+      const listPlan = plan.dangerouslyGetListPlan();
+      const batch: Batch = {
+        // TODO: rename Batch.pathIdentity to fieldPathIdentity
+        pathIdentity: itemPlan.parentPathIdentity, // TODO: this is probably not right?
+        crystalContext,
+        sideEffectPlans: [],
+        plan: listPlan,
+        itemPlan,
+        entries: [],
+        namedReturnType,
+        returnRaw: false,
+      };
+      console.log(
+        `itemPlan.parentPathIdentity : ${itemPlan.parentPathIdentity}`,
+      );
+      batch.entries = planResultses
+        .map((planResults): [CrystalObject, Deferred<any>] | null =>
+          planResults
+            ? [
+                newCrystalObject(
+                  batch.pathIdentity,
+                  namedReturnType.name,
+                  uid(),
+                  [], // Doesn't matter
+                  crystalContext,
+                  new PlanResults(planResults),
+                ),
+                defer(),
+              ]
+            : null,
+        )
+        .filter(isNotNullish);
+      /*Promise.resolve(
+        null &&
+          this.executePlan(
+            listPlan,
+            crystalContext,
+            planResultses,
+            visitedPlans,
+            depth,
+          ),
+      )
+        .then(() => */
+      return this.executeBatch(batch, crystalContext).then(() => {
+        console.dir(batch.entries);
+        throw new Error(`Hello... Found ${itemPlan}`);
+      });
     }
     const pendingPlanResultses: PlanResults[] = []; // Length unknown
     const pendingDeferreds: Deferred<any>[] = []; // Same length as pendingPlanResultses
@@ -2569,9 +2649,10 @@ export class Aether<
         }
         const { parentCrystalObject, indexes, planResults } = clo;
         if (planResults.hasPathIdentity(layerPlan.commonAncestorPathIdentity)) {
-          throw new Error(
-            `Did not expect plans to exist within the '${layerPlan.commonAncestorPathIdentity}' bucket yet.`,
-          );
+          console.dir(planResults);
+          //throw new Error(
+          //  `Did not expect plans to exist within the '${layerPlan.commonAncestorPathIdentity}' bucket yet.`,
+          //);
         }
         // NOTE: this could be an async iterator
         const listResult = clo.planResults.get(
