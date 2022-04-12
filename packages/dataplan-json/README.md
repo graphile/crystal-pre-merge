@@ -3,7 +3,7 @@
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/benjie?label=GitHub%20sponsors)](https://github.com/sponsors/benjie)
 [![Patreon sponsor button](https://img.shields.io/badge/sponsor-via%20Patreon-orange.svg)](https://patreon.com/benjie)
 [![Discord chat room](https://img.shields.io/discord/489127045289476126.svg)](http://discord.gg/graphile)
-[![Follow](https://img.shields.io/badge/twitter-@GraphileHQ-blue.svg)](https://twitter.com/GraphileHQ)
+[![Follow](https://img.shields.io/badge/twitter-@DataPlannerHQ-blue.svg)](https://twitter.com/DataPlannerHQ)
 
 _**A cutting-edge planning and execution engine for GraphQL**_
 
@@ -11,7 +11,7 @@ DataPlanner understands GraphQL and (with your help) it understands your
 business logic; this allows it to orchestrate a GraphQL request's data
 requirements in an extremely efficient manner, leading to excellent performance, reduced server load, and happier customers.
 
-*dataplan/json is plan classes for encoding/decoding JSON*
+*@dataplan/json is plan classes for encoding/decoding JSON*
 
 <!-- SPONSORS_BEGIN -->
 

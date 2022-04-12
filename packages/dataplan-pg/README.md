@@ -11,7 +11,7 @@ DataPlanner understands GraphQL and (with your help) it understands your
 business logic; this allows it to orchestrate a GraphQL request's data
 requirements in an extremely efficient manner, leading to excellent performance, reduced server load, and happier customers.
 
-*dataplan/pg is plan classes for interacting with PostgreSQL*
+*@dataplan/pg is plan classes for interacting with PostgreSQL*
 
 <!-- SPONSORS_BEGIN -->
 
