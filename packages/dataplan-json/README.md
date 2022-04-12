@@ -7,7 +7,7 @@
 
 _**A cutting-edge planning and execution engine for GraphQL**_
 
-DataPlanner understands GraphQL and (with your help) it understands your
+[DataPlanner][dataplanner] understands GraphQL and (with your help) it understands your
 business logic; this allows it to orchestrate a GraphQL request's data
 requirements in an extremely efficient manner, leading to excellent performance, reduced server load, and happier customers.
 
@@ -39,10 +39,4 @@ And please give some love to our featured sponsors 🤩:
 
 <!-- SPONSORS_END -->
 
-## About
-
-DataPlanner can be used as an alternative to the "execute" method of GraphQL.js for the very best performance results, or can be used from within the "execute" method via our automatic resolver-planner bridging (you can install this into an existing schema with the `dataplannerEnforce` method below).
-
-When DataPlanner sees a GraphQL request for the first time it will "plan" the request: figuring out the data requirements, the steps that need to be taken, and how to write the results to the response. This "first draft" plan will be optimised and rewritten to give the best achievable performance (for example removing redundant or duplicate processing steps, rewriting and merging processing steps, etc). Finally, the plan will be executed, and the data returned to the client. Future requests that are compatible with this plan can be executed immediately without a need to re-plan.
-
-
+[dataplanner]: packages/dataplanner/
