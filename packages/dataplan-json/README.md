@@ -1,4 +1,4 @@
-# DataPlanner
+# @DataPlan/JSON
 
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/benjie?label=GitHub%20sponsors)](https://github.com/sponsors/benjie)
 [![Patreon sponsor button](https://img.shields.io/badge/sponsor-via%20Patreon-orange.svg)](https://patreon.com/benjie)
