@@ -1,5 +1,10 @@
 # jest-serializer-graphql-schema
 
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/benjie?color=ff69b4&label=github%20sponsors)](https://github.com/sponsors/benjie)
+[![Patreon sponsor button](https://img.shields.io/badge/sponsor-via%20Patreon-orange.svg)](https://patreon.com/benjie)
+[![Discord chat room](https://img.shields.io/discord/489127045289476126.svg)](http://discord.gg/graphile)
+[![Follow](https://img.shields.io/badge/twitter-@GraphileHQ-blue.svg)](https://twitter.com/GraphileHQ)
+
 A serializer for doing
 [snapshot testing](https://jestjs.io/docs/en/snapshot-testing) of
 [GraphQL schemas](https://graphql.org/learn/schema/) using the
