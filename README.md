@@ -87,6 +87,10 @@ And please give some love to our featured sponsors 🤩:
 
 ## Development
 
+### Requirements
+Node 16 or above
+
+### Set up
 We use `yarn` to manage this monorepo; we strongly recommend that you only use
 `yarn` when dealing with it - not `npm`, `pnpm` or similar. (Not because these
 technologies are in any way inferior to `yarn`, simply because they're not 100%
