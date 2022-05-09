@@ -52,6 +52,9 @@ import {
   PromiseOrDirect,
   TrackedArguments,
   TypedEventEmitter,
+  BaseEventMap,
+  EventMapKey,
+  EventCallback,
 } from "./interfaces";
 import {
   assertListCapablePlan,
@@ -141,10 +144,15 @@ import {
   objectSpec,
   ObjectTypeSpec,
   planGroupsOverlap,
+  ObjectTypeFields,
 } from "./utils";
 
 export { isAsyncIterable } from "iterall";
 export {
+  BaseEventMap,
+  EventMapKey,
+  EventCallback,
+  ObjectTypeFields,
   __InputListPlan,
   __InputObjectPlan,
   __InputStaticLeafPlan,
