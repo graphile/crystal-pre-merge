@@ -66,6 +66,8 @@ import {
   PromiseOrDirect,
   TrackedArguments,
   TypedEventEmitter,
+  ScalarPlanResolver,
+  EnumPlanResolver,
 } from "./interfaces";
 import {
   assertListCapablePlan,
@@ -318,6 +320,8 @@ export {
   subscribe,
   TrackedArguments,
   TypedEventEmitter,
+  ScalarPlanResolver,
+  EnumPlanResolver,
 };
 
 exportAsMany({
