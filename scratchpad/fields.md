@@ -206,4 +206,25 @@ extend type Query {
 }
 ```
 
+```js
+const applyFilter = (InputType, $where, $input) => {
+  const fields = InputType.getFields();
+  for (const field of fields) {
+    const $value = $input.get(field.fieldName);
+    const plan = field.extensions.filterPlan;
+    if (plan && !$value.evalIs(null) && !$value.evalIs(undefined)) {
+      plan($where, $value);
+    }
+  }
+};
+
+const allContactsPlan = ($root, args) => {
+  const $contacts = contactsSource.find();
+  const $where = $contacts.wherePlan();
+  if (!args.filter.evalIs(null) && !args.filter.evalIs(undefined)) {
+    applyFilter(ContactsFilter, $where, args.filter);
+  }
+};
+```
+
 ## Ordering
