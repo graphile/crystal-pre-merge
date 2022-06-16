@@ -244,6 +244,47 @@ extend type Query {
 ```
 
 ```js
+ContactsFilter.fields.AND.extensions.filterPlan = ($where, $value) => {
+  const $s = new AndFilterPlan($where);
+  const l = $value.evalLength();
+  for (let i = 0; i < l; i++) {
+    const $entry = $value.at(i);
+    applyFilter(ContactsFilter, $s, $entry);
+  }
+};
+
+ContactsFilter.fields.OR.extensions.filterPlan = ($where, $value) => {
+  const $s = new OrFilterPlan($where);
+  const l = $value.evalLength();
+  for (let i = 0; i < l; i++) {
+    const $entry = $value.at(i);
+    applyFilter(ContactsFilter, $s, $entry);
+  }
+};
+
+ContactsFilter.fields.NOT.extensions.filterPlan = ($where, $value) => {
+  const $s = new NotFilterPlan($where);
+  applyFilter(ContactsFilter, $s, $value);
+};
+
+ContactsFilter.fields.name.extensions.filterPlan = ($where, $value) => {
+  const $s = new StringFilterPlan($where, sql`${$where.alias}.name`);
+  applyFilter(StringFilter, $s, $value);
+};
+
+ContactsFilter.fields.organizationByOrganizationId.extensions.filterPlan = (
+  $where,
+  $value,
+) => {
+  const $s = new SingleFilterPlan(
+    $where,
+    organizationsSource,
+    ["id"],
+    ["organization_id"],
+  );
+  applyFilter(ManyFilter, $s, $value);
+};
+
 const applyFilter = (InputType, $where, $input) => {
   const fields = InputType.getFields();
   for (const field of fields) {
