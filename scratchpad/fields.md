@@ -15,6 +15,7 @@ create table contacts (
 
 ```graphql
 input ContactInput {
+  id: Int
   name: String!
   phoneNumber: String!
   address: UserAddressInput!
@@ -30,9 +31,12 @@ input ContactAddressInput {
 ```
 
 ```js
-const contactGql2PgPlan = ($contactInput) => {
+const isNotUndefined = (data) => data !== undefined;
+ContactInput.extensions.toDataPlan = ($contactInput) => {
   const $address = $contactInput.get("address");
   return object({
+    id: $contactInput.get("id"),
+
     name: $contactInput.get("name"),
     phone_number: $contactInput.get("phone_number"),
     address_line1: $address.get("line1"),
@@ -40,6 +44,10 @@ const contactGql2PgPlan = ($contactInput) => {
     address_city: $address.get("city"),
     address_country: $address.get("country"),
     address_postcode: $address.get("postcode"),
+
+    has_name: lambda($contactInput.get("name"), isNotUndefined),
+    has_phone_number: lambda($contactInput.get("phone_number"), isNotUndefined),
+    has_address: lambda($contactInput.get("address"), isNotUndefined),
   });
 };
 ```
@@ -63,12 +71,54 @@ extend type Query {
 const findMatchingContactsPlan = ($root, args) => {
   const $plan = findMatchingContactsSource.execute([
     {
-      plan: each(args.contacts, ($contact) => contactGql2PgPlan($contact)),
+      plan: each(args.contacts, ($contact) =>
+        ContactInput.extensions.toDataPlan($contact),
+      ),
       pgCodec: listOfContactsCodec,
       name: "contacts",
     },
   ]);
   return $plan;
+};
+```
+
+## Creating a contact
+
+```graphql
+input CreateContactInput {
+  contact: ContactInput!
+}
+extend type Mutation {
+  createContact(input: CreateContactInput!): CreateContactPayload
+}
+```
+
+```js
+ContactInput.extensions.applyToCreate = ($pgCreate, $data) => {
+  if (!$data.get("id").evalIs(undefined)) {
+    $pgCreate.set("id", $data.get("id"));
+  }
+  if (!$data.get("name").evalIs(undefined)) {
+    $pgCreate.set("name", $data.get("name"));
+  }
+  if (!$data.get("phoneNumber").evalIs(undefined)) {
+    $pgCreate.set("phone_number", $data.get("phoneNumber"));
+  }
+  const $addressInput = $data.get("address");
+  if (!$addressInput.evalIs(undefined)) {
+    $pgCreate.set("address_line1", $addressInput.get("line1"));
+    $pgCreate.set("address_line2", $addressInput.get("line2"));
+    $pgCreate.set("address_city", $addressInput.get("city"));
+    $pgCreate.set("address_country", $addressInput.get("country"));
+    $pgCreate.set("address_postcode", $addressInput.get("postcode"));
+  }
+};
+
+const createContactPlan = ($root, args) => {
+  const $contact = pgCreate(contactsSource);
+  const $data = args.input.get("contact");
+  ContactInput.extensions.applyToCreate($contact, $data);
+  return $contact;
 };
 ```
 
@@ -90,25 +140,29 @@ extend type Mutation {
 ```
 
 ```js
+ContactPatch.extensions.applyToUpdate = ($pgUpdate, $patch) => {
+  if (!$patch.get("name").evalIs(undefined)) {
+    $pgUpdate.set("name", $patch.get("name"));
+  }
+  if (!$patch.get("phoneNumber").evalIs(undefined)) {
+    $pgUpdate.set("phone_number", $patch.get("phoneNumber"));
+  }
+  const $addressInput = $patch.get("address");
+  if (!$addressInput.evalIs(undefined)) {
+    $pgUpdate.set("address_line1", $addressInput.get("line1"));
+    $pgUpdate.set("address_line2", $addressInput.get("line2"));
+    $pgUpdate.set("address_city", $addressInput.get("city"));
+    $pgUpdate.set("address_country", $addressInput.get("country"));
+    $pgUpdate.set("address_postcode", $addressInput.get("postcode"));
+  }
+};
+
 const updateContactPlan = ($root, args) => {
   const $contact = pgUpdate(contactsSource, {
     id: args.input.get("id"),
   });
   const $data = args.input.get("patch");
-  if (!$data.get("name").evalIs(undefined)) {
-    $contact.set("name", $data.get("name"));
-  }
-  if (!$data.get("phoneNumber").evalIs(undefined)) {
-    $contact.set("phone_number", $data.get("phoneNumber"));
-  }
-  const $addressInput = $data.get("address");
-  if (!$addressInput.evalIs(undefined)) {
-    $contact.set("address_line1", $addressInput.get("line1"));
-    $contact.set("address_line2", $addressInput.get("line2"));
-    $contact.set("address_city", $addressInput.get("city"));
-    $contact.set("address_country", $addressInput.get("country"));
-    $contact.set("address_postcode", $addressInput.get("postcode"));
-  }
+  ContactPatch.extensions.applyToUpdate($contact, $data);
   return $contact;
 };
 ```
@@ -122,27 +176,10 @@ extend type Mutation {
 ```
 
 ```js
-const isNotUndefined = (data) => data !== undefined;
 const updateManyContactsPlan = ($root, args) => {
-  const $data = each(args.input, ($input) => {
-    return object({
-      id: $input.get("id"),
-
-      name: $contactInput.get("name"),
-      has_name: lambda($contactInput.get("name"), isNotUndefined),
-      phone_number: $contactInput.get("phone_number"),
-      has_phone_number: lambda(
-        $contactInput.get("phone_number"),
-        isNotUndefined,
-      ),
-      address_line1: $address.get("line1"),
-      address_line2: $address.get("line2"),
-      address_city: $address.get("city"),
-      address_country: $address.get("country"),
-      address_postcode: $address.get("postcode"),
-      has_address: lambda($contactInput.get("address"), isNotUndefined),
-    });
-  });
+  const $data = each(args.input, ($input) =>
+    ContactInput.extensions.toDataPlan($input),
+  );
   const $contactIds = pgRaw($data, async (data, pgClient) => {
     const rows = await pgClient.query(
       `
@@ -162,7 +199,7 @@ const updateManyContactsPlan = ($root, args) => {
       ) patch
       where contacts.id = patch.id
       returning contacts.id
-    `,
+      `,
       [data],
     );
     return rows.map((r) => r.id);
