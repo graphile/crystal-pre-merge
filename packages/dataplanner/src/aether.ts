@@ -1449,6 +1449,7 @@ export class Aether<
       const trackedArguments = wgs(() =>
         this.getTrackedArguments(rootType, field),
       );
+      this.assertNoModifierPlans();
       const subscribePlan = wgs(() =>
         subscriptionPlanResolver(this.trackedRootValuePlan, trackedArguments, {
           schema: this.schema,
@@ -1458,16 +1459,7 @@ export class Aether<
 
       // NOTE: don't need to worry about tracking groupId when planning
       // arguments as they're guaranteed to be identical across all selections.
-      wgs(() =>
-        this.planFieldArguments(
-          rootType,
-          fieldSpec,
-          field,
-          trackedArguments,
-          this.trackedRootValuePlan,
-          subscribePlan,
-        ),
-      );
+      wgs(() => this.applyModifierPlans());
 
       // TODO: this is a LIE! This should be `ROOT_PATH + "[]"` but that breaks
       // everything... We've worked around it elsewhere, but maybe all path
@@ -1759,22 +1751,14 @@ export class Aether<
         const trackedArguments = wgs(() =>
           this.getTrackedArguments(objectType, field),
         );
+        this.assertNoModifierPlans();
         plan = wgs(() =>
           planResolver(parentPlan, trackedArguments, {
             schema: this.schema,
           }),
         );
         assertExecutablePlan(plan, pathIdentity);
-        wgs(() =>
-          this.planFieldArguments(
-            objectType,
-            objectField,
-            field,
-            trackedArguments,
-            parentPlan,
-            plan,
-          ),
-        );
+        wgs(() => this.applyModifierPlans());
 
         // TODO: Check SameStreamDirective still exists in @stream spec at release.
         /*
@@ -1906,6 +1890,8 @@ export class Aether<
     return { fieldDigests };
   }
 
+  // TODO: rename to infer that we are finalizing the field, rather than the
+  // arguments (arguments are part of the field)
   private finalizeArgumentsSince(
     oldPlansLength: number,
     pathIdentity: string,
@@ -2266,54 +2252,15 @@ export class Aether<
     };
   }
 
-  /**
-   * Implements the `PlanFieldArguments` and `PlanFieldArgument` algorithms.
-   */
-  private planFieldArguments(
-    _objectType: GraphQLObjectType,
-    fieldSpec: GraphQLField<unknown, unknown>,
-    _field: FieldNode,
-    trackedArguments: TrackedArguments,
-    parentPlan: ExecutablePlan,
-    fieldPlan: ExecutablePlan,
-  ): void {
+  private assertNoModifierPlans(): void {
     assert.strictEqual(
       this.modifierPlans.length,
       0,
       "Expected Aether.modifierPlans to be empty",
     );
+  }
 
-    // Arguments are applied in the order that they are specified in the
-    // schema, NOT the order that they are specified in the request.
-    for (let i = 0, l = fieldSpec.args.length; i < l; i++) {
-      const argSpec = fieldSpec.args[i];
-      const argName = argSpec.name;
-      const trackedArgumentValuePlan = trackedArguments[argName];
-      if (trackedArgumentValuePlan !== undefined) {
-        const planResolver = argSpec.extensions?.graphile?.plan;
-        if (typeof planResolver === "function") {
-          const argPlan = planResolver(
-            parentPlan,
-            fieldPlan,
-            trackedArgumentValuePlan,
-            { schema: this.schema },
-          );
-          if (argPlan != null) {
-            // TODO: why did I add this? Is it required? Seems important, but
-            // also makes writing the schema a bit more painful.
-            /*
-            assertModifierPlan(
-              argPlan,
-              `${_objectType.name}.${fieldSpec.name}(${argName}:)`,
-            );
-            */
-
-            this.planInput(argSpec.type, trackedArgumentValuePlan, argPlan);
-          }
-        }
-      }
-    }
-
+  private applyModifierPlans(): void {
     // Remove the modifier plans from aether and sort them ready for application.
     const plansToApply = this.modifierPlans
       .splice(0, this.modifierPlans.length)
@@ -2326,11 +2273,12 @@ export class Aether<
     }
   }
 
-  /**
+  // TODO: delete this! It was from when we used to "plan" arguments.
+  /* *
    * Implements the `PlanInput` algorithm.
    *
    * Note: we are only expecting to `PlanInput()` for objects or lists thereof, not scalars.
-   */
+   * /
   private planInput(
     inputType: GraphQLInputType,
     trackedValuePlan: InputPlan,
@@ -2369,7 +2317,7 @@ export class Aether<
 
   /**
    * Implements `PlanInputFields` algorithm.
-   */
+   * /
   private planInputFields(
     inputObjectType: GraphQLInputObjectType,
     trackedValuePlan: InputPlan,
@@ -2398,7 +2346,7 @@ export class Aether<
 
   /**
    * Implements `PlanInputField` algorithm.
-   */
+   * /
   private planInputField(
     inputObjectType: GraphQLInputObjectType,
     inputField: GraphQLInputField,
@@ -2429,6 +2377,7 @@ export class Aether<
       }
     }
   }
+  */
 
   /**
    * Implements the `TrackedArguments` algorithm, a replacement for GraphQL's

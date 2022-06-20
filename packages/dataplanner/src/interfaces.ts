@@ -38,7 +38,7 @@ declare module "graphql" {
 
   interface GraphQLArgumentExtensions {
     graphile?: {
-      plan?: ArgumentPlanResolver<any, any, any, any, any>;
+      // plan?: ArgumentPlanResolver<any, any, any, any, any>;
     };
   }
 

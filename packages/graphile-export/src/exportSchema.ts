@@ -1438,14 +1438,14 @@ function exportSchemaTypeDefs({
         const args = field.args
           ? Object.entries(field.args)
               .map(([argName, arg]) => {
-                if (arg.extensions?.graphile?.plan) {
+                if (arg.extensions?.graphile) {
                   return t.objectProperty(
                     identifierOrLiteral(argName),
                     convertToIdentifierViaAST(
                       file,
-                      arg.extensions.graphile.plan,
-                      `${type.name}.${fieldName}.${argName}Plan`,
-                      `${type.name}.fields[${fieldName}].args[${argName}].extensions.graphile.plan`,
+                      arg.extensions.graphile,
+                      `${type.name}.${fieldName}.${argName}`,
+                      `${type.name}.fields[${fieldName}].args[${argName}].extensions.graphile`,
                     ),
                   );
                 }
