@@ -21,7 +21,10 @@ import type {
   BaseGraphQLRootValue,
   CrystalSubscriber,
   ExecutablePlan,
+  InputObjectFieldPlanResolver,
+  InputPlan,
   ListPlan,
+  ModifierPlan,
 } from "dataplanner";
 import {
   __ListTransformPlan,
@@ -43,6 +46,7 @@ import {
   newInputObjectTypeBuilder,
   newObjectTypeBuilder,
   object,
+  planArgs,
   resolveType,
 } from "dataplanner";
 import { writeFileSync } from "fs";
@@ -2341,6 +2345,10 @@ export function makeExampleSchema(
     };
   }
 
+  type FilterPlanResolver<
+    TPlan extends ModifierPlan<any> | null = PgConditionPlan<any>,
+  > = InputObjectFieldPlanResolver<any, InputPlan, TPlan, any>;
+
   const MessageCondition = newInputObjectTypeBuilder<
     OurGraphQLContext,
     PgConditionPlan<any>
@@ -2349,9 +2357,9 @@ export function makeExampleSchema(
     fields: {
       featured: {
         type: GraphQLBoolean,
-        plan: EXPORTABLE(
-          (TYPES, sql) =>
-            function plan($condition, $value) {
+        plans: EXPORTABLE(
+          (TYPES, sql) => ({
+            plan: function ($condition, $value) {
               if ($value.evalIs(null)) {
                 $condition.where(sql`${$condition.alias}.featured is null`);
               } else {
@@ -2362,7 +2370,8 @@ export function makeExampleSchema(
                   )}`,
                 );
               }
-            },
+            } as FilterPlanResolver,
+          }),
           [TYPES, sql],
         ),
       },
@@ -2377,9 +2386,9 @@ export function makeExampleSchema(
     fields: {
       equalTo: {
         type: GraphQLBoolean,
-        plan: EXPORTABLE(
-          (TYPES, sql) =>
-            function plan($parent, $value) {
+        plans: EXPORTABLE(
+          (TYPES, sql) => ({
+            plan: function filterPlan($parent, $value) {
               if ($value.evalIs(null)) {
                 // Ignore
               } else {
@@ -2390,15 +2399,16 @@ export function makeExampleSchema(
                   )}`,
                 );
               }
-            },
+            } as FilterPlanResolver<BooleanFilterPlan>,
+          }),
           [TYPES, sql],
         ),
       },
       notEqualTo: {
         type: GraphQLBoolean,
-        plan: EXPORTABLE(
-          (TYPES, sql) =>
-            function plan($parent: BooleanFilterPlan, $value) {
+        plans: EXPORTABLE(
+          (TYPES, sql) => ({
+            plan: function filterPlan($parent: BooleanFilterPlan, $value) {
               if ($value.evalIs(null)) {
                 // Ignore
               } else {
@@ -2409,7 +2419,8 @@ export function makeExampleSchema(
                   )}`,
                 );
               }
-            },
+            } as FilterPlanResolver<BooleanFilterPlan>,
+          }),
           [TYPES, sql],
         ),
       },
@@ -2424,9 +2435,9 @@ export function makeExampleSchema(
     fields: {
       featured: {
         type: BooleanFilter,
-        plan: EXPORTABLE(
-          (BooleanFilterPlan, sql) =>
-            function plan($messageFilter, $value) {
+        plans: EXPORTABLE(
+          (BooleanFilterPlan, sql) => ({
+            plan: function filterPlan($messageFilter, $value) {
               if ($value.evalIs(null)) {
                 // Ignore
               } else {
@@ -2435,7 +2446,8 @@ export function makeExampleSchema(
                   sql`${$messageFilter.alias}.featured`,
                 );
               }
-            },
+            } as FilterPlanResolver<ClassFilterPlan>,
+          }),
           [BooleanFilterPlan, sql],
         ),
       },
@@ -2450,9 +2462,9 @@ export function makeExampleSchema(
     fields: {
       name: {
         type: GraphQLString,
-        plan: EXPORTABLE(
-          (TYPES, sql) =>
-            function plan($condition, $value) {
+        plans: EXPORTABLE(
+          (TYPES, sql) => ({
+            plan: function filterPlan($condition, $value) {
               if ($value.evalIs(null)) {
                 $condition.where(sql`${$condition.alias}.name is null`);
               } else {
@@ -2463,7 +2475,8 @@ export function makeExampleSchema(
                   )}`,
                 );
               }
-            },
+            } as FilterPlanResolver,
+          }),
           [TYPES, sql],
         ),
       },
@@ -2478,13 +2491,14 @@ export function makeExampleSchema(
     fields: {
       some: {
         type: MessageFilter,
-        plan: EXPORTABLE(
-          () =>
-            function plan($manyFilter, $value) {
+        plans: EXPORTABLE(
+          () => ({
+            plan: function filterPlan($manyFilter, $value) {
               if (!$value.evalIs(null)) {
                 return $manyFilter.some();
               }
-            },
+            } as FilterPlanResolver<ManyFilterPlan<typeof messageSource>>,
+          }),
           [],
         ),
       },
@@ -2499,9 +2513,9 @@ export function makeExampleSchema(
     fields: {
       messages: {
         type: ForumToManyMessageFilter,
-        plan: EXPORTABLE(
-          (ManyFilterPlan, messageSource) =>
-            function plan($condition, $value) {
+        plans: EXPORTABLE(
+          (ManyFilterPlan, messageSource) => ({
+            plan: function filterPlan($condition, $value) {
               if (!$value.evalIs(null)) {
                 return new ManyFilterPlan(
                   $condition,
@@ -2510,7 +2524,8 @@ export function makeExampleSchema(
                   ["forum_id"],
                 );
               }
-            },
+            } as FilterPlanResolver<ClassFilterPlan>,
+          }),
           [ManyFilterPlan, messageSource],
         ),
       },
@@ -2611,7 +2626,7 @@ export function makeExampleSchema(
           >(($messages) => $messages),
         },
         plan: EXPORTABLE(
-          (deoptimizeIfAppropriate, messageSource) =>
+          (deoptimizeIfAppropriate, messageSource, planArgs) =>
             function plan($forum) {
               const $forumId = $forum.get("id");
               const $messages = messageSource.find({ forum_id: $forumId });
@@ -2622,9 +2637,12 @@ export function makeExampleSchema(
               // $messages.relation('fk_messages_author_id')
               // $messages.where(...);
               // $messages.orderBy(...);
+
+              planArgs($messages, "plan");
+
               return $messages;
             },
-          [deoptimizeIfAppropriate, messageSource],
+          [deoptimizeIfAppropriate, messageSource, planArgs],
         ),
       },
       messagesConnection: {

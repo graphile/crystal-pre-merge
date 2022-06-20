@@ -217,7 +217,15 @@ export const PgColumnsPlugin: GraphileConfig.Plugin = {
                  * joined_thing.column`
                  */
                 return EXPORTABLE(
-                  (baseCodec, columnName, getSource, notNull, pgSelectSingleFromRecord, pgSources) => ($record: PgSelectSinglePlan<any, any, any, any>) => {
+                  (
+                      baseCodec,
+                      columnName,
+                      getSource,
+                      notNull,
+                      pgSelectSingleFromRecord,
+                      pgSources,
+                    ) =>
+                    ($record: PgSelectSinglePlan<any, any, any, any>) => {
                       const $plan = $record.get(columnName);
                       const $select = pgSelectSingleFromRecord(
                         getSource(baseCodec, pgSources, $record),
@@ -229,7 +237,14 @@ export const PgColumnsPlugin: GraphileConfig.Plugin = {
                       $select.getClassPlan().setTrusted();
                       return $select;
                     },
-                  [baseCodec, columnName, getSource, notNull, pgSelectSingleFromRecord, pgSources],
+                  [
+                    baseCodec,
+                    columnName,
+                    getSource,
+                    notNull,
+                    pgSelectSingleFromRecord,
+                    pgSources,
+                  ],
                 );
               } else {
                 // Many records from source
@@ -363,14 +378,15 @@ export const PgColumnsPlugin: GraphileConfig.Plugin = {
                           Boolean(column.extensions?.tags?.hasDefault),
                         columnType,
                       ),
-                      plan: EXPORTABLE(
-                        (columnName) =>
-                          function plan(
+                      plans: EXPORTABLE(
+                        (columnName) => ({
+                          setPlan(
                             $insert: PgSetPlan<any, any>,
                             $value: InputPlan,
                           ) {
                             $insert.set(columnName, $value);
                           },
+                        }),
                         [columnName],
                       ),
                     },

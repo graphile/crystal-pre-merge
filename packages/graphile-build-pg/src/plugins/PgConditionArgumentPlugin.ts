@@ -122,9 +122,9 @@ export const PgConditionArgumentPlugin: GraphileConfig.Plugin = {
                                 "field",
                               ),
                               type: type as GraphQLInputType,
-                              plan: EXPORTABLE(
-                                (column, columnName, sql) =>
-                                  function plan(
+                              plans: EXPORTABLE(
+                                (column, columnName, sql) => ({
+                                  plan(
                                     $condition: PgConditionPlan<
                                       PgSelectPlan<any, any, any, any>
                                     >,
@@ -146,6 +146,7 @@ export const PgConditionArgumentPlugin: GraphileConfig.Plugin = {
                                       );
                                     }
                                   },
+                                }),
                                 [column, columnName, sql],
                               ),
                             },

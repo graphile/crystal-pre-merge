@@ -88,9 +88,9 @@ export const PgConditionCustomFieldsPlugin: GraphileConfig.Plugin = {
                       "field",
                     ),
                     type,
-                    plan: EXPORTABLE(
-                      (pgFieldSource, sql) =>
-                        function plan(
+                    plans: EXPORTABLE(
+                      (pgFieldSource, sql) => ({
+                        plan: function plan(
                           $condition: PgConditionPlan<
                             PgSelectPlan<any, any, any, any>
                           >,
@@ -113,6 +113,7 @@ export const PgConditionCustomFieldsPlugin: GraphileConfig.Plugin = {
                             );
                           }
                         },
+                      }),
                       [pgFieldSource, sql],
                     ),
                   },

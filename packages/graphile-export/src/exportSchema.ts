@@ -1496,12 +1496,12 @@ function exportSchemaTypeDefs({
 
       for (const [fieldName, field] of Object.entries(type.toConfig().fields)) {
         // Use shorthand if there's only a `plan` and nothing else
-        const planAST = field.extensions?.graphile?.plan
+        const planAST = field.extensions?.graphile
           ? convertToIdentifierViaAST(
               file,
-              field.extensions?.graphile?.plan,
-              `${type.name}.${fieldName}Plan`,
-              `${type.name}.fields[${fieldName}].extensions.graphile.plan`,
+              field.extensions?.graphile,
+              `${type.name}.${fieldName}`,
+              `${type.name}.fields[${fieldName}].extensions.graphile`,
             )
           : null;
         if (!planAST) {

@@ -1,10 +1,20 @@
 import type { Aether } from "../aether.js";
 import { getCurrentAether, getDebug, setDebug } from "../global.js";
-import type { BaseGraphQLContext } from "../interfaces.js";
+import type {
+  BaseGraphQLContext,
+  DataPlannerArgumentExtensions,
+} from "../interfaces.js";
+import type { ExecutablePlan } from "../plan.js";
 import type { __ValuePlan } from "./__value.js";
 
 export function aether(): Aether {
   return getCurrentAether();
+}
+
+export function planArgs<
+  TPlanName extends keyof Exclude<DataPlannerArgumentExtensions, undefined>,
+>($related: ExecutablePlan, planFieldName: TPlanName): void {
+  return aether().planArgs($related, planFieldName);
 }
 
 export function context<

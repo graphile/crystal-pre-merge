@@ -1,7 +1,11 @@
 import "graphile-config";
 
 import type { EdgeCapablePlan, PageInfoCapablePlan } from "dataplanner";
-import { ConnectionPlan, ExecutablePlan } from "dataplanner";
+import {
+  ArgumentPlanResolver,
+  ConnectionPlan,
+  ExecutablePlan,
+} from "dataplanner";
 import { EXPORTABLE } from "graphile-export";
 import type { GraphQLOutputType } from "graphql";
 

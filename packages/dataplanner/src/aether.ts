@@ -3,6 +3,7 @@ import debugFactory from "debug";
 import type {
   FieldNode,
   FragmentDefinitionNode,
+  GraphQLArgumentExtensions,
   GraphQLEnumType,
   GraphQLField,
   GraphQLInputField,
@@ -82,6 +83,7 @@ import type {
   CrystalContext,
   CrystalObject,
   CrystalResultsList,
+  DataPlannerArgumentExtensions,
   FieldAndGroup,
   FieldPlanResolver,
   GroupedSelections,
@@ -790,6 +792,13 @@ export class Aether<
   private [$$contextPlanCache]: any = null;
   private [$$introspectionResponseCache]: any = null;
 
+  private currentFieldState: null | {
+    fieldSpec: GraphQLField<any, any, any>;
+    trackedArguments: TrackedArguments<any>;
+    parentPlan: ExecutablePlan;
+    calledPlanNames: string[];
+  } = null;
+
   constructor(
     public readonly schema: GraphQLSchema,
     // Note: whereas the `NewAether` algorithm refers to `document` and
@@ -1450,6 +1459,7 @@ export class Aether<
       const subscribePlan = this.doPlan<any>(
         ROOT_PATH,
         undefined,
+        fieldSpec,
         rootType,
         field,
         this.trackedRootValuePlan,
@@ -1743,50 +1753,13 @@ export class Aether<
         plan = this.doPlan(
           path,
           fieldType,
+          objectField,
           objectType,
           field,
           parentPlan,
           planResolver,
           pathIdentity,
         );
-
-        // TODO: Check SameStreamDirective still exists in @stream spec at release.
-        /*
-         * `SameStreamDirective`
-         * (https://github.com/graphql/graphql-spec/blob/26fd78c4a89a79552dcc0c7e0140a975ce654400/spec/Section%205%20--%20Validation.md#L450-L458)
-         * ensures that every field that has `@stream` must have the same
-         * `@stream` arguments; so we can just check the first node in the
-         * merged set to see our stream options. NOTE: if this changes before
-         * release then we may need to find the stream with the largest
-         * `initialCount` to figure what to do; something like:
-         *
-         *      const streamDirective = firstField.directives?.filter(
-         *        (d) => d.name.value === "stream",
-         *      ).sort(
-         *        (a, z) => getArg(z, 'initialCount', 0) - getArg(a, 'initialCount', 0)
-         *      )[0]
-         */
-        const streamDirective = firstField.directives?.find(
-          (d) => d.name.value === "stream",
-        );
-
-        const planOptions: PlanOptions = {
-          stream:
-            streamDirective && isStreamablePlan(plan)
-              ? {
-                  initialCount:
-                    Number(
-                      getDirectiveArg(
-                        field,
-                        "stream",
-                        "initialCount",
-                        this.trackedVariableValuesPlan,
-                      ),
-                    ) || 0,
-                }
-              : null,
-        };
-        this.planOptionsByPlan.set(plan, planOptions);
       } else {
         // There's no plan resolver; use the parent plan
         plan = parentPlan;
@@ -2243,111 +2216,149 @@ export class Aether<
     }
   }
 
-  // TODO: delete this! It was from when we used to "plan" arguments.
-  /* *
-   * Implements the `PlanInput` algorithm.
-   *
-   * Note: we are only expecting to `PlanInput()` for objects or lists thereof, not scalars.
-   * /
-  private planInput(
-    inputType: GraphQLInputType,
-    trackedValuePlan: InputPlan,
-    parentPlan: ExecutablePlan | ModifierPlan<any>,
-  ): void {
-    if (isNonNullType(inputType)) {
-      this.planInput(inputType.ofType, trackedValuePlan, parentPlan);
-    } else if (isListType(inputType)) {
-      if (trackedValuePlan.evalIs(null)) {
-        // parentPlan.null();
-        return;
-      }
-      const innerInputType = inputType.ofType;
-      // TODO: assert trackedValuePlan represents a list
-      const length = (trackedValuePlan as any).evalLength?.();
-      for (let i = 0; i < length; i++) {
-        const listItemParentPlan = (parentPlan as any).itemPlan();
-        const trackedListValue = (trackedValuePlan as any).at(i);
-        this.planInput(innerInputType, trackedListValue, listItemParentPlan);
-      }
-    } else if (isInputObjectType(inputType)) {
-      if (trackedValuePlan.evalIs(null)) {
-        // TODO: should we indicate to the parent that this is null as opposed to an empty object?
-        return;
-      }
-      this.planInputFields(inputType, trackedValuePlan, parentPlan);
-      return;
-    } else {
-      throw new Error(
-        `Invalid plan; planInput called for unsupported type '${inspect(
-          inputType,
-        )}'.`,
-      );
-    }
-  }
+  planArgs<
+    TPlanName extends keyof Exclude<DataPlannerArgumentExtensions, undefined>,
+  >($related: ExecutablePlan, planName: TPlanName): void {
+    const schema = this.schema;
+    const { fieldSpec, trackedArguments, parentPlan, calledPlanNames } =
+      this.currentFieldState!;
+    calledPlanNames.push(planName);
 
-  /**
-   * Implements `PlanInputFields` algorithm.
-   * /
-  private planInputFields(
-    inputObjectType: GraphQLInputObjectType,
-    trackedValuePlan: InputPlan,
-    parentPlan: ExecutablePlan | ModifierPlan<any>,
-  ): void {
-    assert.ok(
-      trackedValuePlan instanceof __InputObjectPlan,
-      "Expected trackedValuePlan to be an __InputObjectPlan",
-    );
-    const inputFieldSpecs = inputObjectType.getFields();
-    // Input fields are applied in the order that they are specified in the
+    /**
+     * Implements the `PlanInput` algorithm.
+     *
+     * Note: we are only expecting to `PlanInput()` for objects or lists thereof, not scalars.
+     */
+    function planInput(
+      inputType: GraphQLInputType,
+      trackedValuePlan: InputPlan,
+      parentPlan: ExecutablePlan | ModifierPlan<any>,
+    ): void {
+      if (isNonNullType(inputType)) {
+        planInput(inputType.ofType, trackedValuePlan, parentPlan);
+      } else if (isListType(inputType)) {
+        if (trackedValuePlan.evalIs(null)) {
+          // parentPlan.null();
+          return;
+        }
+        const innerInputType = inputType.ofType;
+        // TODO: assert trackedValuePlan represents a list
+        const length = (trackedValuePlan as any).evalLength?.();
+        for (let i = 0; i < length; i++) {
+          const listItemParentPlan = (parentPlan as any).itemPlan();
+          const trackedListValue = (trackedValuePlan as any).at(i);
+          planInput(innerInputType, trackedListValue, listItemParentPlan);
+        }
+      } else if (isInputObjectType(inputType)) {
+        if (trackedValuePlan.evalIs(null)) {
+          // TODO: should we indicate to the parent that this is null as opposed to an empty object?
+          return;
+        }
+        planInputFields(inputType, trackedValuePlan, parentPlan);
+        return;
+      } else {
+        throw new Error(
+          `Invalid plan; planInput called for unsupported type '${inspect(
+            inputType,
+          )}'.`,
+        );
+      }
+    }
+
+    /**
+     * Implements `PlanInputFields` algorithm.
+     */
+    function planInputFields(
+      inputObjectType: GraphQLInputObjectType,
+      trackedValuePlan: InputPlan,
+      parentPlan: ExecutablePlan | ModifierPlan<any>,
+    ): void {
+      assert.ok(
+        trackedValuePlan instanceof __InputObjectPlan,
+        "Expected trackedValuePlan to be an __InputObjectPlan",
+      );
+      const inputFieldSpecs = inputObjectType.getFields();
+      // Input fields are applied in the order that they are specified in the
+      // schema, NOT the order that they are specified in the request.
+      for (const fieldName in inputFieldSpecs) {
+        const inputFieldSpec = inputFieldSpecs[fieldName];
+        if (trackedValuePlan.evalHas(fieldName)) {
+          const trackedFieldValue = trackedValuePlan.get(fieldName);
+          planInputField(
+            inputObjectType,
+            inputFieldSpec,
+            trackedFieldValue,
+            parentPlan,
+          );
+        }
+      }
+    }
+
+    /**
+     * Implements `PlanInputField` algorithm.
+     */
+    function planInputField(
+      inputObjectType: GraphQLInputObjectType,
+      inputField: GraphQLInputField,
+      trackedValuePlan: InputPlan,
+      parentPlan: ExecutablePlan | ModifierPlan<any>,
+    ): void {
+      const planResolver: any = inputField.extensions?.graphile?.[planName];
+      if (planResolver != null) {
+        assert.strictEqual(
+          typeof planResolver,
+          "function",
+          `Expected ${inputObjectType.name}.${inputField.name}'s 'extensions.graphile.${planName}' property to be a plan resolver function.`,
+        );
+        const inputFieldPlan = planResolver(parentPlan, trackedValuePlan, {
+          schema,
+        });
+        if (inputFieldPlan != null) {
+          const inputFieldType = inputField.type;
+          // Note: the unwrapped type of inputFieldType must be an input object.
+          // TODO: assert this?
+          planInput(inputFieldType, trackedValuePlan, inputFieldPlan);
+        }
+      } else {
+        if (isDev) {
+          console.warn(
+            `Expected ${inputObjectType.name}.${inputField.name} to have an 'extensions.graphile.${planName}' function, but it does not.`,
+          );
+        }
+      }
+    }
+
+    // Arguments are applied in the order that they are specified in the
     // schema, NOT the order that they are specified in the request.
-    for (const fieldName in inputFieldSpecs) {
-      const inputFieldSpec = inputFieldSpecs[fieldName];
-      if (trackedValuePlan.evalHas(fieldName)) {
-        const trackedFieldValue = trackedValuePlan.get(fieldName);
-        this.planInputField(
-          inputObjectType,
-          inputFieldSpec,
-          trackedFieldValue,
-          parentPlan,
-        );
-      }
-    }
-  }
+    for (let i = 0, l = fieldSpec.args.length; i < l; i++) {
+      const argSpec = fieldSpec.args[i];
+      const argName = argSpec.name;
+      const trackedArgumentValuePlan = trackedArguments[argName];
+      if (trackedArgumentValuePlan !== undefined) {
+        const planResolver: any = argSpec.extensions?.graphile?.[planName];
+        if (typeof planResolver === "function") {
+          const argPlan = planResolver(
+            parentPlan,
+            $related,
+            trackedArgumentValuePlan,
+            { schema },
+          );
+          if (argPlan != null) {
+            // TODO: why did I add this? Is it required? Seems important, but
+            // also makes writing the schema a bit more painful.
+            /*                                                                                                                                                                                                                             
+						assertModifierPlan(                                                                                                                                                                                                            
+							argPlan,                                                                                                                                                                                                                     
+							`${_objectType.name}.${fieldSpec.name}(${argName}:)`,                                                                                                                                                                        
+						);                                                                                                                                                                                                                             
+						*/
 
-  /**
-   * Implements `PlanInputField` algorithm.
-   * /
-  private planInputField(
-    inputObjectType: GraphQLInputObjectType,
-    inputField: GraphQLInputField,
-    trackedValuePlan: InputPlan,
-    parentPlan: ExecutablePlan | ModifierPlan<any>,
-  ): void {
-    const planResolver = inputField.extensions?.graphile?.plan;
-    if (planResolver != null) {
-      assert.strictEqual(
-        typeof planResolver,
-        "function",
-        `Expected ${inputObjectType.name}.${inputField.name}'s 'extensions.graphile.plan' property to be a plan resolver function.`,
-      );
-      const inputFieldPlan = planResolver(parentPlan, trackedValuePlan, {
-        schema: this.schema,
-      });
-      if (inputFieldPlan != null) {
-        const inputFieldType = inputField.type;
-        // Note: the unwrapped type of inputFieldType must be an input object.
-        // TODO: assert this?
-        this.planInput(inputFieldType, trackedValuePlan, inputFieldPlan);
-      }
-    } else {
-      if (isDev) {
-        console.warn(
-          `Expected ${inputObjectType.name}.${inputField.name} to have an 'extensions.graphile.plan' function, but it does not.`,
-        );
+            planInput(argSpec.type, trackedArgumentValuePlan, argPlan);
+          }
+        }
       }
     }
   }
-  */
 
   /**
    * Implements the `TrackedArguments` algorithm, a replacement for GraphQL's
@@ -2403,6 +2414,7 @@ export class Aether<
   >(
     path: string,
     fieldType: GraphQLOutputType | undefined,
+    fieldSpec: GraphQLField<any, any, any>,
     objectType: GraphQLObjectType,
     field: FieldNode,
     parentPlan: ExecutablePlan,
@@ -2419,15 +2431,64 @@ export class Aether<
       this.getTrackedArguments(objectType, field),
     );
     this.assertNoModifierPlans();
+    const calledPlanNames: string[] = [];
+    this.currentFieldState = {
+      fieldSpec,
+      trackedArguments,
+      parentPlan,
+      calledPlanNames,
+    };
     let plan = wgs(() =>
       planResolver(parentPlan, trackedArguments, {
         schema: this.schema,
       }),
     );
     assertExecutablePlan(plan, pathIdentity);
+
+    if (!calledPlanNames.includes("plan")) {
+      wgs(() => this.planArgs(plan, "plan"));
+    }
     // NOTE: don't need to worry about tracking groupId when planning
     // arguments as they're guaranteed to be identical across all selections.
     wgs(() => this.applyModifierPlans());
+
+    // TODO: Check SameStreamDirective still exists in @stream spec at release.
+    /*
+     * `SameStreamDirective`
+     * (https://github.com/graphql/graphql-spec/blob/26fd78c4a89a79552dcc0c7e0140a975ce654400/spec/Section%205%20--%20Validation.md#L450-L458)
+     * ensures that every field that has `@stream` must have the same
+     * `@stream` arguments; so we can just check the first node in the
+     * merged set to see our stream options. NOTE: if this changes before
+     * release then we may need to find the stream with the largest
+     * `initialCount` to figure what to do; something like:
+     *
+     *      const streamDirective = firstField.directives?.filter(
+     *        (d) => d.name.value === "stream",
+     *      ).sort(
+     *        (a, z) => getArg(z, 'initialCount', 0) - getArg(a, 'initialCount', 0)
+     *      )[0]
+     */
+    const streamDirective = field.directives?.find(
+      (d) => d.name.value === "stream",
+    );
+
+    const planOptions: PlanOptions = {
+      stream:
+        streamDirective && isStreamablePlan(plan as any)
+          ? {
+              initialCount:
+                Number(
+                  getDirectiveArg(
+                    field,
+                    "stream",
+                    "initialCount",
+                    this.trackedVariableValuesPlan,
+                  ),
+                ) || 0,
+            }
+          : null,
+    };
+    this.planOptionsByPlan.set(plan, planOptions);
 
     const newPlansLength = this.planCount;
     if (debugPlanVerboseEnabled) {
@@ -2448,6 +2509,7 @@ export class Aether<
     // After deduplication, this plan may have been substituted; get the
     // updated reference.
     plan = this.plans[plan.id]!;
+    this.currentFieldState = null;
     return plan as any;
   }
 
