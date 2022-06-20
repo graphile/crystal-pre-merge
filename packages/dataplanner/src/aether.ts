@@ -83,6 +83,7 @@ import type {
   CrystalObject,
   CrystalResultsList,
   FieldAndGroup,
+  FieldPlanResolver,
   GroupedSelections,
   PlanOptions,
   PromiseOrDirect,
@@ -1446,32 +1447,29 @@ export class Aether<
     const subscriptionPlanResolver =
       fieldSpec.extensions?.graphile?.subscribePlan;
     if (subscriptionPlanResolver) {
-      const trackedArguments = wgs(() =>
-        this.getTrackedArguments(rootType, field),
-      );
-      this.assertNoModifierPlans();
-      const subscribePlan = wgs(() =>
-        subscriptionPlanResolver(this.trackedRootValuePlan, trackedArguments, {
-          schema: this.schema,
-        }),
+      const subscribePlan = this.doPlan<any>(
+        ROOT_PATH,
+        undefined,
+        rootType,
+        field,
+        this.trackedRootValuePlan,
+        subscriptionPlanResolver,
+        ROOT_PATH,
       );
       this.subscriptionPlanId = subscribePlan.id;
-
-      // NOTE: don't need to worry about tracking groupId when planning
-      // arguments as they're guaranteed to be identical across all selections.
-      wgs(() => this.applyModifierPlans());
 
       // TODO: this is a LIE! This should be `ROOT_PATH + "[]"` but that breaks
       // everything... We've worked around it elsewhere, but maybe all path
       // identities inside a subscription operation should assume ROOT_PATH of
       // `~[]` rather than `~`?
       const nestedParentPathIdentity = ROOT_PATH;
+      const oldPlansLength = this.planCount;
       const streamItemPlan = withGlobalState(
         { aether: this, parentPathIdentity: ROOT_PATH },
         () => subscribePlan.itemPlan(this.itemPlanFor(subscribePlan)),
       );
       this.subscriptionItemPlanId = streamItemPlan.id;
-      this.finalizeArgumentsSince(0, ROOT_PATH);
+      this.finalizeArgumentsSince(oldPlansLength, ROOT_PATH);
       const { fieldDigests } = this.planSelectionSet(
         nestedParentPathIdentity,
         nestedParentPathIdentity,
@@ -1742,23 +1740,15 @@ export class Aether<
       let plan: ExecutablePlan | PolymorphicPlan;
       this.sideEffectPlanIdsByPathIdentity[pathIdentity] = [];
       if (typeof planResolver === "function") {
-        const oldPlansLength = this.planCount;
-        const wgs = withGlobalState.bind(null, {
-          aether: this,
-          parentPathIdentity: path,
-          currentGraphQLType: fieldType,
-        }) as <T>(cb: () => T) => T;
-        const trackedArguments = wgs(() =>
-          this.getTrackedArguments(objectType, field),
+        plan = this.doPlan(
+          path,
+          fieldType,
+          objectType,
+          field,
+          parentPlan,
+          planResolver,
+          pathIdentity,
         );
-        this.assertNoModifierPlans();
-        plan = wgs(() =>
-          planResolver(parentPlan, trackedArguments, {
-            schema: this.schema,
-          }),
-        );
-        assertExecutablePlan(plan, pathIdentity);
-        wgs(() => this.applyModifierPlans());
 
         // TODO: Check SameStreamDirective still exists in @stream spec at release.
         /*
@@ -1797,26 +1787,6 @@ export class Aether<
               : null,
         };
         this.planOptionsByPlan.set(plan, planOptions);
-
-        const newPlansLength = this.planCount;
-        if (debugPlanVerboseEnabled) {
-          debugPlanVerbose(
-            "Created %o new plans whilst processing %p",
-            newPlansLength - oldPlansLength,
-            pathIdentity,
-          );
-        }
-
-        this.finalizeArgumentsSince(oldPlansLength, pathIdentity, true);
-
-        // Now that the field has been planned (including arguments, but NOT
-        // including selection set) we can deduplicate it to see if any of its
-        // peers are identical.
-        this.deduplicatePlans(oldPlansLength);
-
-        // After deduplication, this plan may have been substituted; get the
-        // updated reference.
-        plan = this.plans[plan.id]!;
       } else {
         // There's no plan resolver; use the parent plan
         plan = parentPlan;
@@ -2423,6 +2393,62 @@ export class Aether<
       }
     }
     return trackedArgumentValues;
+  }
+
+  // TODO: type this such that we don't need to pass any to FieldPlanResolver?
+  doPlan<
+    TPlan extends ExecutablePlan | PolymorphicPlan =
+      | ExecutablePlan
+      | PolymorphicPlan,
+  >(
+    path: string,
+    fieldType: GraphQLOutputType | undefined,
+    objectType: GraphQLObjectType,
+    field: FieldNode,
+    parentPlan: ExecutablePlan,
+    planResolver: FieldPlanResolver<any, any, any>,
+    pathIdentity: string,
+  ): TPlan {
+    const oldPlansLength = this.planCount;
+    const wgs = withGlobalState.bind(null, {
+      aether: this,
+      parentPathIdentity: path,
+      currentGraphQLType: fieldType,
+    }) as <T>(cb: () => T) => T;
+    const trackedArguments = wgs(() =>
+      this.getTrackedArguments(objectType, field),
+    );
+    this.assertNoModifierPlans();
+    let plan = wgs(() =>
+      planResolver(parentPlan, trackedArguments, {
+        schema: this.schema,
+      }),
+    );
+    assertExecutablePlan(plan, pathIdentity);
+    // NOTE: don't need to worry about tracking groupId when planning
+    // arguments as they're guaranteed to be identical across all selections.
+    wgs(() => this.applyModifierPlans());
+
+    const newPlansLength = this.planCount;
+    if (debugPlanVerboseEnabled) {
+      debugPlanVerbose(
+        "Created %o new plans whilst processing %p",
+        newPlansLength - oldPlansLength,
+        pathIdentity,
+      );
+    }
+
+    this.finalizeArgumentsSince(oldPlansLength, pathIdentity, true);
+
+    // Now that the field has been planned (including arguments, but NOT
+    // including selection set) we can deduplicate it to see if any of its
+    // peers are identical.
+    this.deduplicatePlans(oldPlansLength);
+
+    // After deduplication, this plan may have been substituted; get the
+    // updated reference.
+    plan = this.plans[plan.id]!;
+    return plan as any;
   }
 
   private getPlanIds(offset = 0) {
