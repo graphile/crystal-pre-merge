@@ -66,7 +66,8 @@
     "webpack": "^5.65.0"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "website"
   ],
   "engines": {
     "node": ">=14.17",
