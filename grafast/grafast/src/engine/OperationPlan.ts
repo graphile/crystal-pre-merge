@@ -827,6 +827,7 @@ export class OperationPlan {
         // All grouped fields are equivalent, as mandated by GraphQL validation rules. Thus we can take the first one.
         const field = fieldNodes[0];
         const fieldName = field.name.value;
+        const objectField = objectTypeFields[fieldName];
 
         const locationDetails: LocationDetails = {
           parentTypeName: objectType.name,
@@ -834,8 +835,6 @@ export class OperationPlan {
           node: fieldNodes,
         };
 
-        // This is presumed to exist because the operation passed validation.
-        const objectField = objectTypeFields[fieldName];
 
         if (fieldName.startsWith("__")) {
           if (fieldName === "__typename") {
@@ -867,6 +866,13 @@ export class OperationPlan {
           }
           continue;
         }
+
+        if (!objectField) {
+          // Field does not exist; this should have been caught by validation
+          // but the spec says to just skip it.
+          continue;
+        }
+
         const fieldType = objectTypeFields[fieldName].type;
         const rawPlanResolver = objectField.extensions?.graphile?.plan;
         const namedReturnType = getNamedType(fieldType);
