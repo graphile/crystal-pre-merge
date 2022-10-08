@@ -835,7 +835,6 @@ export class OperationPlan {
           node: fieldNodes,
         };
 
-
         if (fieldName.startsWith("__")) {
           if (fieldName === "__typename") {
             outputPlan.addChild(objectType, responseKey, {
