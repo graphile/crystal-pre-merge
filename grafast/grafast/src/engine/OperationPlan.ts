@@ -872,7 +872,7 @@ export class OperationPlan {
           continue;
         }
 
-        const fieldType = objectTypeFields[fieldName].type;
+        const fieldType = objectField.type;
         const rawPlanResolver = objectField.extensions?.graphile?.plan;
         const namedReturnType = getNamedType(fieldType);
 
