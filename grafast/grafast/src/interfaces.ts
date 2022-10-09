@@ -18,7 +18,7 @@ import type {
 } from "graphql";
 
 import type { Bucket, RequestContext } from "./bucket.js";
-import type { GrafastError } from "./error.js";
+import type { _GrafastError,GrafastError } from "./error.js";
 import type { InputStep } from "./input.js";
 import type { ExecutableStep, ListCapableStep, ModifierStep } from "./step.js";
 import type { __InputDynamicScalarStep } from "./steps/__inputDynamicScalar.js";
@@ -172,7 +172,9 @@ export interface IndexByListItemStepId {
 // These values are just to make reading the code a little clearer
 export type GrafastValuesList<T> = ReadonlyArray<T>;
 export type PromiseOrDirect<T> = PromiseLike<T> | T;
-export type GrafastResultsList<T> = ReadonlyArray<PromiseOrDirect<T>>;
+export type GrafastResultsList<T> = ReadonlyArray<
+  PromiseOrDirect<T> | _GrafastError
+>;
 export type GrafastResultStreamList<T> = ReadonlyArray<
   AsyncIterable<PromiseOrDirect<T>> | GrafastError
 >;
