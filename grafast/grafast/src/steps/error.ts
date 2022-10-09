@@ -8,17 +8,22 @@ export class ErrorStep extends UnbatchedExecutableStep {
     exportName: "ErrorStep",
   };
   isSyncAndSafe = false;
-  promise: Promise<void>;
+  error: Error;
   constructor(error: Error) {
     super();
-    this.promise = Promise.reject(error);
+    if (!(error instanceof Error)) {
+      throw new Error(
+        `${error} error must be an Error (passed value is not an instanceof Error)`,
+      );
+    }
+    this.error = error;
   }
 
   execute(values: GrafastValuesList<any>): GrafastResultsList<any> {
-    return arrayOfLength(values[0].length, this.promise);
+    return arrayOfLength(values[0].length, this.error);
   }
   executeSingle(): any {
-    return this.promise;
+    return this.error;
   }
 }
 

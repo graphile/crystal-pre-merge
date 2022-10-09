@@ -109,12 +109,10 @@ export function executeBucket(
           }
         }
       } catch (e) {
-        const r = Promise.reject(e);
-        if (!starterPromises) {
-          starterPromises = [r];
-        } else {
-          starterPromises.push(r);
-        }
+        const r = newGrafastError(e, step.id);
+        bucket.store.set(step.id, arrayOfLength(bucket.size, r));
+        bucket.hasErrors = true;
+        reallyCompletedStep(step);
       }
     }
     const handleSideEffectPlanIds = () => {
@@ -206,12 +204,12 @@ export function executeBucket(
           }
         }
       } catch (e) {
-        const r = Promise.reject(e);
-        if (promises) {
-          promises.push(r);
-        } else {
-          promises = [r];
-        }
+        const r = isGrafastError(e)
+          ? e
+          : newGrafastError(e, potentialNextStep.id);
+        bucket.store.set(potentialNextStep.id, arrayOfLength(bucket.size, r));
+        bucket.hasErrors = true;
+        reallyCompletedStep(potentialNextStep);
       }
     }
     if (promises) {
@@ -332,6 +330,10 @@ export function executeBucket(
           pendingPromises.push(val);
           pendingPromiseIndexes!.push(i);
         }
+      } else if (val instanceof Error) {
+        const e = newGrafastError(val, finishedStep.id);
+        finalResult[i] = e;
+        bucket.hasErrors = true;
       } else {
         success(val, i);
       }

@@ -8,6 +8,7 @@ import {
   currentPolymorphicPaths,
 } from "./engine/lib/withGlobalLayerPlan.js";
 import type { OperationPlan } from "./engine/OperationPlan.js";
+import { newGrafastError } from "./error.js";
 import { getDebug } from "./global.js";
 import { inspect } from "./inspect.js";
 import type {
@@ -440,10 +441,12 @@ export abstract class UnbatchedExecutableStep<
 
   finalize() {
     this.execute = new Function(
-      "values",
-      "extra",
-      this.isSyncAndSafe
-        ? `\
+      "newGrafastError",
+      `\
+return function execute(values, extra) {
+${
+  this.isSyncAndSafe
+    ? `\
     const count = values[0].length;
     const results = [];
     for (let i = 0; i < count; i++) {
@@ -457,7 +460,7 @@ export abstract class UnbatchedExecutableStep<
     }
     return results;
 `
-        : `\
+    : `\
     const count = values[0].length;
     const results = [];
     for (let i = 0; i < count; i++) {
@@ -470,12 +473,13 @@ export abstract class UnbatchedExecutableStep<
                 .join(", ")
         });
       } catch (e) {
-        results[i] = Promise.reject(e);
+        results[i] = newGrafastError(e, this.id);
       }
     }
     return results;
-`,
-    ) as any;
+`
+}}`,
+    )(newGrafastError);
     super.finalize();
   }
 
@@ -493,7 +497,7 @@ export abstract class UnbatchedExecutableStep<
         const tuple = values.map((list) => list[i]);
         results[i] = this.executeSingle(extra, ...tuple);
       } catch (e) {
-        results[i] = Promise.reject(e);
+        results[i] = newGrafastError(e, this.id);
       }
     }
     return results;
