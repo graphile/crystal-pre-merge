@@ -345,6 +345,80 @@ export default makeExtendSchemaPlugin((build) => {
 });
 ```
 
+```js
+export const TodoPlugin = makeExtendSchemaPlugin((build) => {
+  const { sql, input } = build;
+  const executor = input.pgSources[0].executor;
+  const todos = build.input.pgSources.find(
+    (s) => s.extensions?.pg && s.extensions.pg.name === "todos"
+  );
+  if (!todos) {
+    throw new Error("Couldn't find todos source");
+  }
+  return {
+    typeDefs: gql`
+      input TodosInput {
+        userId: String!
+      }
+      type TodosPayload {
+        todos: [Todo!]!
+      }
+      extend type Mutation {
+        fetchTodos(input: TodosInput!): TodosPayload
+      }
+    `,
+    plans: {
+      Mutation: {
+        fetchTodos(_$root, fieldArgs) {
+          const $rootPgPool = context().get("rootPgPool");
+          const $input = object({
+            userId: fieldArgs.get(["input", "userId"]),
+          });
+          const $transactionResult = withPgClientTransaction(
+            executor,
+            object({
+              input: $input,
+              rootPgPool: $rootPgPool,
+            }),
+
+            async (client, data) => {
+              const { userId } = data?.input;
+
+              const todos = await getTodosAPI({
+                input: { userId: userId },
+              });
+
+              if (!todos) throw new Error("Couldn't find Todos");
+
+              //Insert todos into postgres
+
+              if (!sql) return;
+              const { rows } = await client.query(
+                sql.compile(
+                  sql`SELECT *
+                      FROM app_public.todos
+                      WHERE user_id=${sql.value(userId)}`
+                )
+              );
+              return rows;
+            }
+          );
+          return $transactionResult;
+        },
+      },
+      TodosPayload: {
+        todos($transactionResult) {
+          const $ids = lambda($transactionResult, (records) =>
+            records.map((record) => record.id)
+          );
+          return each($ids, ($id) => todos.get({ id: $id }));
+        },
+      },
+    },
+  };
+});
+```
+
 ## QueryBuilder "named children"
 
 This concept is no longer useful or needed, and can be ported to much more
