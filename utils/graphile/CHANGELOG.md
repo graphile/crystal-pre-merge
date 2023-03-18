@@ -1,5 +1,20 @@
 # graphile
 
+## 5.0.0-0.7
+
+### Patch Changes
+
+- [`dad8c0695`](undefined) - Fix bug in 'graphile config print' where plugins
+  weren't treated as providing themselves.
+
+## 5.0.0-0.6
+
+### Patch Changes
+
+- Updated dependencies
+  [[`11e7c12c5`](https://github.com/benjie/postgraphile-private/commit/11e7c12c5a3545ee24b5e39392fbec190aa1cf85)]:
+  - graphile-config@0.0.1-0.6
+
 ## 5.0.0-0.5
 
 ### Patch Changes
