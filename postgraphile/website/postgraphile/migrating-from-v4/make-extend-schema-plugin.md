@@ -346,6 +346,10 @@ export default makeExtendSchemaPlugin((build) => {
 ```
 
 ```js
+import { withPgClientTransaction } from "@dataplan/pg";
+import { context, each, lambda, object } from "grafast";
+import { gql, makeExtendSchemaPlugin } from "graphile-utils";
+
 export const TodoPlugin = makeExtendSchemaPlugin((build) => {
   const { sql, input } = build;
   const executor = input.pgSources[0].executor;
