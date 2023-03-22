@@ -15,6 +15,7 @@ import { createClient } from "graphql-ws";
 import { useEffect, useMemo, useState } from "react";
 
 import type { RuruProps } from "../interfaces.js";
+import { useStorage } from "./useStorage.js";
 
 export interface IExplainedOperation {
   type: string;
@@ -98,6 +99,7 @@ export const useFetcher = (
   props: RuruProps,
   options: { explain?: boolean; verbose?: boolean } = {},
 ) => {
+  const storage = useStorage();
   const [streamEndpoint, setStreamEndpoint] = useState<string | null>(null);
   const endpoint = props.endpoint ?? "/graphql";
   const url = endpoint.startsWith("/")
@@ -148,6 +150,7 @@ export const useFetcher = (
     () => ({
       url,
       headers: {
+        ...JSON.parse(storage.get("headers") || "{}"),
         ...(explain
           ? {
               "X-PostGraphile-Explain": "on",

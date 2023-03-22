@@ -14,7 +14,7 @@ export interface StoredKeys {
 
 const KEYS: { [key in keyof StoredKeys]: string } = {
   saveHeaders: "Ruru:saveHeadersText",
-  headers: "Ruru:headersText",
+  headers: "graphiql:headers",
   explain: "Ruru:explain",
   explainSize: "Ruru:explainSize",
   explainIsOpen: "Ruru:explainIsOpen",
