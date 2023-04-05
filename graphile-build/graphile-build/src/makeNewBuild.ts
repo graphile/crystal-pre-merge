@@ -72,7 +72,10 @@ export default function makeNewBuild(
       scope: GraphileBuild.SomeScope;
       specGenerator: any;
       origin: string | null | undefined;
-      Step?: { new (...args: any[]): ExecutableStep<any> } | null;
+      Step?:
+        | ((step: ExecutableStep) => asserts step is ExecutableStep)
+        | { new (...args: any[]): ExecutableStep }
+        | null;
     };
   } = Object.create(null);
 
@@ -84,7 +87,10 @@ export default function makeNewBuild(
     klass: { new (spec: any): GraphQLNamedType },
     typeName: string,
     scope: GraphileBuild.SomeScope,
-    Step: { new (...args: any[]): ExecutableStep<any> } | null,
+    Step:
+      | ((step: ExecutableStep) => asserts step is ExecutableStep)
+      | { new (...args: any[]): ExecutableStep }
+      | null,
     specGenerator: () => any,
     origin: string | null | undefined,
   ) {
@@ -324,7 +330,7 @@ export default function makeNewBuild(
             spec.name = typeName;
 
             const finishedBuild = build as ReturnType<
-              typeof builder["createBuild"]
+              (typeof builder)["createBuild"]
             >;
             const type = builder.newWithHooks<any>(
               finishedBuild,

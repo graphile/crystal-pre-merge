@@ -2,14 +2,14 @@ import "./PgTablesPlugin.js";
 import "graphile-config";
 
 import type {
+  PgCodec,
   PgSelectParsedCursorStep,
   PgSelectSingleStep,
   PgSelectStep,
-  PgTypeCodec,
 } from "@dataplan/pg";
 import type {
   ConnectionStep,
-  GraphileFieldConfigArgumentMap,
+  GrafastFieldConfigArgumentMap,
   InputStep,
 } from "grafast";
 import { getEnumValueConfig, SafeError } from "grafast";
@@ -26,7 +26,7 @@ declare global {
       orderByType(this: Inflection, typeName: string): string;
     }
     interface ScopeEnum {
-      pgCodec?: PgTypeCodec<any, any, any, any>;
+      pgCodec?: PgCodec;
       isPgRowSortEnum?: boolean;
     }
   }
@@ -76,7 +76,7 @@ export const PgConnectionArgOrderByPlugin: GraphileConfig.Plugin = {
               values: {
                 [inflection.builtin("NATURAL")]: {
                   extensions: {
-                    graphile: {
+                    grafast: {
                       // NATURAL means to not change the sort order
                       applyPlan: EXPORTABLE(() => () => {}, []),
                     },
@@ -109,7 +109,7 @@ export const PgConnectionArgOrderByPlugin: GraphileConfig.Plugin = {
           fieldName,
           isPgFieldConnection,
           isPgFieldSimpleCollection,
-          pgSource,
+          pgResource,
           pgFieldCodec,
         } = scope;
 
@@ -117,13 +117,13 @@ export const PgConnectionArgOrderByPlugin: GraphileConfig.Plugin = {
           return args;
         }
 
-        const codec = pgFieldCodec ?? pgSource?.codec;
+        const codec = pgFieldCodec ?? pgResource?.codec;
         const isSuitableSource =
-          pgSource && pgSource.codec.columns && !pgSource.isUnique;
+          pgResource && pgResource.codec.columns && !pgResource.isUnique;
         const isSuitableCodec =
           codec &&
           (isSuitableSource ||
-            (!pgSource && codec?.polymorphism?.mode === "union")) &&
+            (!pgResource && codec?.polymorphism?.mode === "union")) &&
           codec.columns;
 
         if (!isSuitableCodec) {
@@ -132,13 +132,13 @@ export const PgConnectionArgOrderByPlugin: GraphileConfig.Plugin = {
         const behavior = getBehavior([
           scope,
           codec?.extensions,
-          pgSource?.extensions,
+          pgResource?.extensions,
         ]);
         if (
           !build.behavior.matches(
             behavior,
             "order",
-            pgSource?.parameters ? "" : "order",
+            pgResource?.parameters ? "" : "order",
           )
         ) {
           return args;
@@ -168,9 +168,9 @@ export const PgConnectionArgOrderByPlugin: GraphileConfig.Plugin = {
                       function plan(
                         _: any,
                         $connection: ConnectionStep<
-                          PgSelectSingleStep<any, any, any, any>,
+                          PgSelectSingleStep<any>,
                           PgSelectParsedCursorStep,
-                          PgSelectStep<any, any, any, any>
+                          PgSelectStep<any>
                         >,
                         val,
                         info: { schema: GraphQLSchema },
@@ -192,7 +192,7 @@ export const PgConnectionArgOrderByPlugin: GraphileConfig.Plugin = {
                     (applyOrderToPlan, tableOrderByTypeName) =>
                       function plan(
                         _: any,
-                        $select: PgSelectStep<any, any, any, any>,
+                        $select: PgSelectStep<any>,
                         val,
                         info: { schema: GraphQLSchema },
                       ) {
@@ -209,7 +209,7 @@ export const PgConnectionArgOrderByPlugin: GraphileConfig.Plugin = {
                     [applyOrderToPlan, tableOrderByTypeName],
                   ),
             },
-          } as GraphileFieldConfigArgumentMap<any, any, any, any>,
+          } as GrafastFieldConfigArgumentMap<any, any, any, any>,
           `Adding 'orderBy' argument to field '${fieldName}' of '${Self.name}'`,
         );
       },
@@ -220,7 +220,7 @@ export const PgConnectionArgOrderByPlugin: GraphileConfig.Plugin = {
 export const applyOrderToPlan = EXPORTABLE(
   (SafeError, getEnumValueConfig, inspect) =>
     (
-      $select: PgSelectStep<any, any, any, any>,
+      $select: PgSelectStep<any>,
       $value: InputStep,
       TableOrderByType: GraphQLEnumType,
     ) => {
@@ -230,7 +230,7 @@ export const applyOrderToPlan = EXPORTABLE(
       }
       val.forEach((order) => {
         const config = getEnumValueConfig(TableOrderByType, order);
-        const plan = config?.extensions?.graphile?.applyPlan;
+        const plan = config?.extensions?.grafast?.applyPlan;
         if (typeof plan !== "function") {
           console.error(
             `Internal server error: invalid orderBy configuration: expected function, but received ${inspect(

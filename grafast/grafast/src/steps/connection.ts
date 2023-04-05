@@ -1,10 +1,6 @@
 import * as assert from "../assert.js";
 import type { InputStep } from "../input.js";
-import type {
-  ExecutionExtra,
-  GrafastResultsList,
-  GrafastValuesList,
-} from "../interfaces.js";
+import type { ExecutionExtra, GrafastResultsList } from "../interfaces.js";
 import type { ExecutableStep } from "../step.js";
 import { UnbatchedExecutableStep } from "../step.js";
 import { arrayOfLength } from "../utils.js";
@@ -18,7 +14,7 @@ type ParametersExceptFirst<F> = F extends (arg0: any, ...rest: infer R) => any
  * Describes what a plan needs to implement in order to be suitable for
  * supplying what the `PageInfo` type requires.
  */
-export interface PageInfoCapableStep extends ExecutableStep<any> {
+export interface PageInfoCapableStep extends ExecutableStep {
   hasNextPage(): ExecutableStep<boolean>;
   hasPreviousPage(): ExecutableStep<boolean>;
   startCursor(): ExecutableStep<string | null>;
@@ -30,8 +26,8 @@ export interface PageInfoCapableStep extends ExecutableStep<any> {
  * supplying what a ConnectionStep requires.
  */
 export interface ConnectionCapableStep<
-  TItemStep extends ExecutableStep<any>,
-  TCursorStep extends ExecutableStep<any>,
+  TItemStep extends ExecutableStep,
+  TCursorStep extends ExecutableStep,
 > extends ExecutableStep<
     ReadonlyArray<TItemStep extends ExecutableStep<infer U> ? U : any>
   > {
@@ -68,10 +64,10 @@ const EMPTY_OBJECT = Object.freeze(Object.create(null));
  * indepdenent of data source.
  */
 export class ConnectionStep<
-  TItemStep extends ExecutableStep<any>,
-  TCursorStep extends ExecutableStep<any>,
+  TItemStep extends ExecutableStep,
+  TCursorStep extends ExecutableStep,
   TStep extends ConnectionCapableStep<TItemStep, TCursorStep>,
-  TNodeStep extends ExecutableStep<any> = ExecutableStep<any>,
+  TNodeStep extends ExecutableStep = ExecutableStep,
 > extends UnbatchedExecutableStep<unknown> {
   static $$export = {
     moduleName: "grafast",
@@ -298,11 +294,9 @@ export class ConnectionStep<
   }
   */
 
-  public execute(
-    values: Array<GrafastValuesList<any>>,
-  ): GrafastResultsList<Record<string, never>> {
+  public execute(count: number): GrafastResultsList<Record<string, never>> {
     // Fake execution; data actually comes from the child plans
-    return arrayOfLength(values[0].length, EMPTY_OBJECT);
+    return arrayOfLength(count, EMPTY_OBJECT);
   }
 
   public unbatchedExecute() {
@@ -310,17 +304,17 @@ export class ConnectionStep<
   }
 }
 
-export interface EdgeCapableStep<TNodeStep extends ExecutableStep<any>>
-  extends ExecutableStep<any> {
+export interface EdgeCapableStep<TNodeStep extends ExecutableStep>
+  extends ExecutableStep {
   node(): TNodeStep;
   cursor(): ExecutableStep<string | null>;
 }
 
 export class EdgeStep<
-    TItemStep extends ExecutableStep<any>,
-    TCursorStep extends ExecutableStep<any>,
+    TItemStep extends ExecutableStep,
+    TCursorStep extends ExecutableStep,
     TStep extends ConnectionCapableStep<TItemStep, TCursorStep>,
-    TNodeStep extends ExecutableStep<any> = ExecutableStep<any>,
+    TNodeStep extends ExecutableStep = ExecutableStep,
   >
   extends UnbatchedExecutableStep
   implements EdgeCapableStep<TNodeStep>
@@ -345,7 +339,7 @@ export class EdgeStep<
     assert.strictEqual(
       itemDepId,
       0,
-      "GraphileInternalError<89cc75cd-ccaf-4b7e-873f-a629c36d55f7>: item must be first dependency",
+      "GrafastInternalError<89cc75cd-ccaf-4b7e-873f-a629c36d55f7>: item must be first dependency",
     );
     if (!skipCursor) {
       const $cursor =
@@ -360,7 +354,7 @@ export class EdgeStep<
       assert.strictEqual(
         this.cursorDepId,
         1,
-        "GraphileInternalError<46e4b5ca-0c11-4737-973d-0edd0be060c9>: cursor must be second dependency",
+        "GrafastInternalError<46e4b5ca-0c11-4737-973d-0edd0be060c9>: cursor must be second dependency",
       );
     } else {
       this.cursorDepId = null;
@@ -423,10 +417,10 @@ export class EdgeStep<
  * cursor connections.
  */
 export function connection<
-  TItemStep extends ExecutableStep<any>,
-  TCursorStep extends ExecutableStep<any>,
+  TItemStep extends ExecutableStep,
+  TCursorStep extends ExecutableStep,
   TStep extends ConnectionCapableStep<TItemStep, TCursorStep>,
-  TNodeStep extends ExecutableStep<any> = ExecutableStep<any>,
+  TNodeStep extends ExecutableStep = ExecutableStep,
 >(
   step: TStep,
   itemPlan?: ($item: TItemStep) => TNodeStep,

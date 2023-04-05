@@ -1,6 +1,6 @@
 {
   "name": "postgraphile",
-  "version": "5.0.0-0.36",
+  "version": "5.0.0-0.37",
   "description": "Automatic, high performance, and highly customizable GraphQL API for PostgreSQL",
   "type": "commonjs",
   "main": "./dist/index.js",
@@ -58,7 +58,7 @@
   "dependencies": {
     "@dataplan/pg": "workspace:*",
     "@graphile/lru": "workspace:^",
-    "@types/node": "^16.11.15",
+    "@types/node": "^18.15.5",
     "@types/pg": "^8.6.2",
     "debug": "^4.3.3",
     "grafast": "workspace:^",
@@ -89,7 +89,7 @@
     "@types/jsonwebtoken": "^8",
     "@types/nodemon": "1.19.1",
     "graphile": "workspace:^",
-    "jest": "^28.1.0",
+    "jest": "^28.1.3",
     "nodemon": "^2.0.15",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.0-beta"

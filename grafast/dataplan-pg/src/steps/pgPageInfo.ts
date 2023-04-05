@@ -1,7 +1,6 @@
 import type {
   ExecutableStep,
   GrafastResultsList,
-  GrafastValuesList,
   PageInfoCapableStep,
 } from "grafast";
 import {
@@ -34,7 +33,7 @@ const EMPTY_OBJECT = Object.freeze(Object.create(null));
  * {@page ~@dataplan/pg/steps/pgPageInfo.md}
  */
 export class PgPageInfoStep<
-    TStep extends PgSelectStep<any, any, any, any> | PgUnionAllStep<any, any>,
+    TStep extends PgSelectStep<any> | PgUnionAllStep<any, any>,
   >
   extends UnbatchedExecutableStep<any>
   implements PageInfoCapableStep
@@ -99,7 +98,7 @@ export class PgPageInfoStep<
         $connection as ConnectionStep<
           any,
           PgSelectParsedCursorStep,
-          PgSelectStep<any, any, any, any>,
+          PgSelectStep<any>,
           any
         >
       ).cloneSubplanWithPagination();
@@ -134,10 +133,10 @@ export class PgPageInfoStep<
     if (lastExists && !firstExists) {
       const nodePlan = (
         $connection as ConnectionStep<
-          PgSelectSingleStep<any, any, any, any>,
+          PgSelectSingleStep<any>,
           PgSelectParsedCursorStep,
-          PgSelectStep<any, any, any, any>,
-          PgSelectSingleStep<any, any, any, any>
+          PgSelectStep<any>,
+          PgSelectSingleStep<any>
         >
       ).cloneSubplanWithPagination();
       return nodePlan.hasMore();
@@ -153,32 +152,30 @@ export class PgPageInfoStep<
     }
   }
 
-  startCursor(): PgCursorStep<PgSelectSingleStep<any, any, any, any>> {
+  startCursor(): PgCursorStep<PgSelectSingleStep<any>> {
     const $connection = this.getConnectionStep() as ConnectionStep<
-      PgSelectSingleStep<any, any, any, any>,
+      PgSelectSingleStep<any>,
       PgSelectParsedCursorStep,
-      PgSelectStep<any, any, any, any>,
-      PgSelectSingleStep<any, any, any, any>
+      PgSelectStep<any>,
+      PgSelectSingleStep<any>
     >;
     const $rows = $connection.cloneSubplanWithPagination();
     return new PgSelectSingleStep($rows, first($rows)).cursor();
   }
 
-  endCursor(): PgCursorStep<PgSelectSingleStep<any, any, any, any>> {
+  endCursor(): PgCursorStep<PgSelectSingleStep<any>> {
     const $connection = this.getConnectionStep() as ConnectionStep<
-      PgSelectSingleStep<any, any, any, any>,
+      PgSelectSingleStep<any>,
       PgSelectParsedCursorStep,
-      PgSelectStep<any, any, any, any>,
-      PgSelectSingleStep<any, any, any, any>
+      PgSelectStep<any>,
+      PgSelectSingleStep<any>
     >;
     const $rows = $connection.cloneSubplanWithPagination();
     return new PgSelectSingleStep($rows, last($rows)).cursor();
   }
 
-  execute(
-    values: GrafastValuesList<ReadonlyArray<any>>,
-  ): GrafastResultsList<object> {
-    return new Array(values[0].length).fill(EMPTY_OBJECT);
+  execute(count: number): GrafastResultsList<object> {
+    return new Array(count).fill(EMPTY_OBJECT);
   }
 
   unbatchedExecute() {
@@ -192,7 +189,7 @@ export class PgPageInfoStep<
  * {@page ~@dataplan/pg/steps/pgPageInfo.md}
  */
 export function pgPageInfo<
-  TStep extends PgSelectStep<any, any, any, any> | PgUnionAllStep<any, any>,
+  TStep extends PgSelectStep<any> | PgUnionAllStep<any, any>,
 >(
   connectionPlan: ConnectionStep<any, PgSelectParsedCursorStep, TStep, any>,
 ): PgPageInfoStep<TStep> {

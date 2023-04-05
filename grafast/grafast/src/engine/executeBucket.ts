@@ -79,7 +79,6 @@ export function executeBucket(
   const {
     size,
     store,
-    noDepsList,
     layerPlan: { phases, children: childLayerPlans },
   } = bucket;
 
@@ -441,7 +440,7 @@ export function executeBucket(
           .then(null, (e) => {
             // THIS SHOULD NEVER HAPPEN!
             console.error(
-              `GraphileInternalError<1e9731b4-005e-4b0e-bc61-43baa62e6444>: this error should never occur! Please file an issue against grafast. Details: ${e}`,
+              `GrafastInternalError<1e9731b4-005e-4b0e-bc61-43baa62e6444>: this error should never occur! Please file an issue against grafast. Details: ${e}`,
             );
 
             bucket.hasErrors = true;
@@ -456,7 +455,7 @@ export function executeBucket(
               const storeEntry = bucket.store.get(finishedStep.id)!;
               storeEntry[dataIndex] = newGrafastError(
                 new Error(
-                  `GraphileInternalError<1e9731b4-005e-4b0e-bc61-43baa62e6444>: error occurred whilst performing completedStep(${finishedStep.id})`,
+                  `GrafastInternalError<1e9731b4-005e-4b0e-bc61-43baa62e6444>: error occurred whilst performing completedStep(${finishedStep.id})`,
                 ),
                 finishedStep.id,
               );
@@ -499,9 +498,9 @@ export function executeBucket(
     extra: ExecutionExtra,
   ): PromiseOrDirect<GrafastResultsList<any> | GrafastResultStreamList<any>> {
     if (step._stepOptions.stream && isStreamableStep(step)) {
-      return step.stream(dependencies, extra, step._stepOptions.stream);
+      return step.stream(size, dependencies, extra, step._stepOptions.stream);
     } else {
-      return step.execute(dependencies, extra);
+      return step.execute(size, dependencies, extra);
     }
   }
 
@@ -533,7 +532,7 @@ export function executeBucket(
           isDev && DEBUG_POLYMORPHISM
             ? newGrafastError(
                 new Error(
-                  `GraphileInternalError<00d52055-06b0-4b25-abeb-311b800ea284>: step ${
+                  `GrafastInternalError<00d52055-06b0-4b25-abeb-311b800ea284>: step ${
                     step.id
                   } (polymorphicPaths ${[
                     ...step.polymorphicPaths,
@@ -567,12 +566,7 @@ export function executeBucket(
 
     // Trim the side-effect dependencies back out again
     const dependencies = sideEffectPlanIdsWithErrors
-      ? dependenciesIncludingSideEffects.slice(
-          0,
-          // There must always be at least one dependency! This serves the same
-          // purpose as bucket.noDepsList
-          Math.max(1, step.dependencies.length),
-        )
+      ? dependenciesIncludingSideEffects.slice(0, step.dependencies.length)
       : dependenciesIncludingSideEffects;
 
     if (needsNoExecution) {
@@ -632,8 +626,6 @@ export function executeBucket(
             }
           }
         }
-      } else {
-        dependencies.push(noDepsList);
       }
       const isSelectiveStep =
         step.polymorphicPaths.size !== step.layerPlan.polymorphicPaths.size;
@@ -712,13 +704,13 @@ export function executeBucket(
         case "root": {
           throw new Error(
             // *confused emoji*
-            "GraphileInternalError<05fb7069-81b5-43f7-ae71-f62547d2c2b7>: root cannot be not the root (...)",
+            "GrafastInternalError<05fb7069-81b5-43f7-ae71-f62547d2c2b7>: root cannot be not the root (...)",
           );
         }
         default: {
           const never: never = childLayerPlan.reason;
           throw new Error(
-            `GraphileInternalError<c6984a96-050e-4d40-ab18-a8c5dc7e239b>: unhandled reason '${inspect(
+            `GrafastInternalError<c6984a96-050e-4d40-ab18-a8c5dc7e239b>: unhandled reason '${inspect(
               never,
             )}'`,
           );
@@ -749,7 +741,7 @@ export function newBucket(
     // Some validations
     if (!(spec.size > 0)) {
       throw new Error(
-        "GraphileInternalError<eb5c962d-c748-4759-95e3-52c50c873593>: No need to create an empty bucket!",
+        "GrafastInternalError<eb5c962d-c748-4759-95e3-52c50c873593>: No need to create an empty bucket!",
       );
     }
     assert.strictEqual(
@@ -786,7 +778,6 @@ export function newBucket(
     polymorphicPathList: spec.polymorphicPathList,
 
     isComplete: false,
-    noDepsList: arrayOfLength(spec.size, undefined),
     children: Object.create(null),
   };
 }

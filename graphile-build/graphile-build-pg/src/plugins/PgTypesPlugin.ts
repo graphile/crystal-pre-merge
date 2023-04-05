@@ -301,7 +301,7 @@ export const PgTypesPlugin: GraphileConfig.Plugin = {
                 type: GraphQLFloat,
                 plan: EXPORTABLE(
                   (access) =>
-                    function plan($r: ExecutableStep<any>) {
+                    function plan($r: ExecutableStep) {
                       return access($r, ["seconds"]);
                     },
                   [access],
@@ -315,7 +315,7 @@ export const PgTypesPlugin: GraphileConfig.Plugin = {
                 type: GraphQLInt,
                 plan: EXPORTABLE(
                   (access) =>
-                    function plan($r: ExecutableStep<any>) {
+                    function plan($r: ExecutableStep) {
                       return access($r, ["minutes"]);
                     },
                   [access],
@@ -329,7 +329,7 @@ export const PgTypesPlugin: GraphileConfig.Plugin = {
                 type: GraphQLInt,
                 plan: EXPORTABLE(
                   (access) =>
-                    function plan($r: ExecutableStep<any>) {
+                    function plan($r: ExecutableStep) {
                       return access($r, ["hours"]);
                     },
                   [access],
@@ -343,7 +343,7 @@ export const PgTypesPlugin: GraphileConfig.Plugin = {
                 type: GraphQLInt,
                 plan: EXPORTABLE(
                   (access) =>
-                    function plan($r: ExecutableStep<any>) {
+                    function plan($r: ExecutableStep) {
                       return access($r, ["days"]);
                     },
                   [access],
@@ -357,7 +357,7 @@ export const PgTypesPlugin: GraphileConfig.Plugin = {
                 type: GraphQLInt,
                 plan: EXPORTABLE(
                   (access) =>
-                    function plan($r: ExecutableStep<any>) {
+                    function plan($r: ExecutableStep) {
                       return access($r, ["months"]);
                     },
                   [access],
@@ -371,7 +371,7 @@ export const PgTypesPlugin: GraphileConfig.Plugin = {
                 type: GraphQLInt,
                 plan: EXPORTABLE(
                   (access) =>
-                    function plan($r: ExecutableStep<any>) {
+                    function plan($r: ExecutableStep) {
                       return access($r, ["years"]);
                     },
                   [access],
@@ -411,7 +411,7 @@ export const PgTypesPlugin: GraphileConfig.Plugin = {
           function registerGeometry(
             typeName: string,
             description: string,
-            fieldGen: () => GraphileBuild.GraphileFieldConfigMap<any, any>,
+            fieldGen: () => GraphileBuild.GrafastFieldConfigMap<any, any>,
             inputFieldGen: () => GraphQLInputFieldConfigMap,
           ): void {
             build.registerObjectType(

@@ -1,5 +1,5 @@
 import type { PgConditionStep, PgSelectStep } from "@dataplan/pg";
-import type { FieldArgs, GraphileInputFieldConfig } from "grafast";
+import type { FieldArgs, GrafastInputFieldConfig } from "grafast";
 import type { SQL, sql } from "pg-sql2";
 
 import { EXPORTABLE } from "./exportable.js";
@@ -9,11 +9,11 @@ export function makeAddPgTableConditionPlugin(
   conditionFieldName: string,
   conditionFieldSpecGenerator: (
     build: GraphileBuild.Build,
-  ) => GraphileInputFieldConfig<any, any, any, any, any>,
+  ) => GrafastInputFieldConfig<any, any, any, any, any>,
   conditionGenerator?: (
     value: FieldArgs,
     helpers: {
-      $condition: PgConditionStep<PgSelectStep<any, any, any, any>>;
+      $condition: PgConditionStep<PgSelectStep>;
       sql: typeof sql;
       sqlTableAlias: SQL;
       build: GraphileBuild.Build;
@@ -67,7 +67,7 @@ export function makeAddPgTableConditionPlugin(
           const conditionFieldSpec = conditionFieldSpecGenerator(build);
           if (
             conditionFieldSpec.applyPlan ||
-            conditionFieldSpec.extensions?.graphile?.applyPlan
+            conditionFieldSpec.extensions?.grafast?.applyPlan
           ) {
             if (conditionGenerator) {
               throw new Error(
@@ -85,7 +85,7 @@ export function makeAddPgTableConditionPlugin(
             conditionFieldSpec.applyPlan = EXPORTABLE(
               (build, conditionGenerator, sql) =>
                 function applyPlan(
-                  $condition: PgConditionStep<PgSelectStep<any, any, any, any>>,
+                  $condition: PgConditionStep<PgSelectStep>,
                   val,
                 ) {
                   const expression = conditionGenerator!(val, {

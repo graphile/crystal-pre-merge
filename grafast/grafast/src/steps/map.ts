@@ -47,7 +47,7 @@ export function makeMapper(actualKeyByDesiredKey: ActualKeyByDesiredKey) {
 export class MapStep extends UnbatchedExecutableStep {
   static $$export = {
     moduleName: "grafast",
-    exportName: "MapStep ",
+    exportName: "MapStep",
   };
   isSyncAndSafe = true;
   allowMultipleOptimizations = true;
@@ -70,7 +70,10 @@ export class MapStep extends UnbatchedExecutableStep {
     );
   }
 
-  execute(values: GrafastValuesList<any[]>): GrafastResultsList<any> {
+  execute(
+    _count: number,
+    values: GrafastValuesList<any[]>,
+  ): GrafastResultsList<any> {
     return values[0].map(this.mapper);
   }
 

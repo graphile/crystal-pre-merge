@@ -1,7 +1,7 @@
 import type {
   BaseGraphQLArguments,
   ExecutableStep,
-  GraphileFieldConfig,
+  GrafastFieldConfig,
   OutputPlanForType,
 } from "grafast";
 import { inputObjectFieldSpec, objectSpec } from "grafast";
@@ -55,7 +55,10 @@ export type NewWithHooksFunction = <
   klass: { new (spec: SpecForType<TType>): TType },
   spec: SpecForType<TType>,
   scope: ScopeForType<TType>,
-  Step?: { new (...args: any[]): ExecutableStep<any> } | null,
+  Step?:
+    | ((step: ExecutableStep) => asserts step is ExecutableStep)
+    | { new (...args: any[]): ExecutableStep }
+    | null,
 ) => TType;
 
 /**
@@ -123,7 +126,7 @@ export function makeNewWithHooks({ builder }: MakeNewWithHooksOptions): {
         }
 
         case GraphQLObjectType: {
-          const rawSpec = inSpec as GraphileBuild.GraphileObjectTypeConfig<
+          const rawSpec = inSpec as GraphileBuild.GrafastObjectTypeConfig<
             any,
             any
           >;
@@ -165,7 +168,7 @@ export function makeNewWithHooks({ builder }: MakeNewWithHooksOptions): {
               );
             },
             fields: () => {
-              const processedFields: GraphileFieldConfig<
+              const processedFields: GrafastFieldConfig<
                 any,
                 any,
                 any,
@@ -175,13 +178,13 @@ export function makeNewWithHooks({ builder }: MakeNewWithHooksOptions): {
               const fieldWithHooks: GraphileBuild.FieldWithHooksFunction = <
                 TType extends GraphQLOutputType,
                 TContext extends Grafast.Context,
-                TParentStep extends ExecutableStep<any>,
+                TParentStep extends ExecutableStep,
                 TFieldStep extends OutputPlanForType<TType>,
                 TArgs extends BaseGraphQLArguments,
               >(
                 fieldScope: GraphileBuild.ScopeObjectFieldsField,
                 fieldSpec:
-                  | GraphileFieldConfig<
+                  | GrafastFieldConfig<
                       TType,
                       TContext,
                       TParentStep,
@@ -190,14 +193,14 @@ export function makeNewWithHooks({ builder }: MakeNewWithHooksOptions): {
                     >
                   | ((
                       context: GraphileBuild.ContextObjectFieldsField,
-                    ) => GraphileFieldConfig<
+                    ) => GrafastFieldConfig<
                       TType,
                       TContext,
                       TParentStep,
                       TFieldStep,
                       TArgs
                     >),
-              ): GraphileFieldConfig<
+              ): GrafastFieldConfig<
                 TType,
                 TContext,
                 TParentStep,
@@ -345,7 +348,7 @@ export function makeNewWithHooks({ builder }: MakeNewWithHooksOptions): {
         }
 
         case GraphQLInterfaceType: {
-          const rawSpec = inSpec as GraphileBuild.GraphileInterfaceTypeConfig<
+          const rawSpec = inSpec as GraphileBuild.GrafastInterfaceTypeConfig<
             any,
             any
           >;
@@ -522,7 +525,7 @@ export function makeNewWithHooks({ builder }: MakeNewWithHooksOptions): {
         }
 
         case GraphQLUnionType: {
-          const rawSpec = inSpec as GraphileBuild.GraphileUnionTypeConfig<
+          const rawSpec = inSpec as GraphileBuild.GrafastUnionTypeConfig<
             any,
             any
           >;
@@ -568,7 +571,7 @@ export function makeNewWithHooks({ builder }: MakeNewWithHooksOptions): {
         }
 
         case GraphQLInputObjectType: {
-          const rawSpec = inSpec as GraphileBuild.GraphileInputObjectTypeConfig;
+          const rawSpec = inSpec as GraphileBuild.GrafastInputObjectTypeConfig;
           const scope = (inScope ||
             Object.create(null)) as GraphileBuild.ScopeInputObject;
 
@@ -667,6 +670,7 @@ export function makeNewWithHooks({ builder }: MakeNewWithHooksOptions): {
                 }
                 fieldsSpec[fieldName] = inputObjectFieldSpec(
                   fieldsSpec[fieldName],
+                  `${Self.name}.${fieldName}`,
                 );
               }
               return fieldsSpec;

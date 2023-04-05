@@ -70,6 +70,7 @@ import { access } from "../steps/access.js";
 import { constant, ConstantStep } from "../steps/constant.js";
 import { graphqlResolver } from "../steps/graphqlResolver.js";
 import {
+  assertNotAsync,
   defaultValueToValueNode,
   findVariableNamesUsed,
   isTypePlanned,
@@ -457,7 +458,7 @@ ${te.join(
           `Error occurred during query planning: \n${e.stack || e}`,
         );
       }
-      throw new SafeError(`Failed to plan this query.`);
+      throw new Error(`Query planning error: ${e.message}`, { cause: e });
     }
   }
 
@@ -581,7 +582,7 @@ ${te.join(
     const rootTypeFields = rootType.getFields();
     const fieldSpec: GraphQLField<unknown, unknown> = rootTypeFields[fieldName];
     const rawSubscriptionPlanResolver =
-      fieldSpec.extensions?.graphile?.subscribePlan;
+      fieldSpec.extensions?.grafast?.subscribePlan;
     const path = [field.alias?.value ?? fieldName];
     const locationDetails: LocationDetails = {
       parentTypeName: rootType.name,
@@ -613,7 +614,7 @@ ${te.join(
         throw new SafeError("Failed to setup subscription");
       }
       const stepOptions: StepOptions = {
-        stream: isStreamableStep(subscribeStep as ExecutableStep<any>)
+        stream: isStreamableStep(subscribeStep as ExecutableStep)
           ? { initialCount: 0 }
           : null,
       };
@@ -711,7 +712,7 @@ ${te.join(
         },
       );
       const stepOptions: StepOptions = {
-        stream: isStreamableStep(subscribeStep as ExecutableStep<any>)
+        stream: isStreamableStep(subscribeStep as ExecutableStep)
           ? { initialCount: 0 }
           : null,
       };
@@ -977,7 +978,8 @@ ${te.join(
         }
 
         const fieldType = objectField.type;
-        const rawPlanResolver = objectField.extensions?.graphile?.plan;
+        const rawPlanResolver = objectField.extensions?.grafast?.plan;
+        assertNotAsync(rawPlanResolver, `${objectType.name}.${fieldName}.plan`);
         const namedReturnType = getNamedType(fieldType);
 
         /**
@@ -1059,7 +1061,7 @@ ${te.join(
          *        directly.)
          */
 
-        const typePlan = objectType.extensions?.graphile?.Step;
+        const typePlan = objectType.extensions?.grafast?.Step;
 
         if (resolver) {
           this.pure = false;
@@ -1085,14 +1087,14 @@ ${te.join(
               typePlan.displayName || typePlan.name || "ExecutableStep"
             }', however field ${
               objectType.name
-            }.${fieldName} has no plan. Please add an 'extensions.graphile.plan' callback to this field.`,
+            }.${fieldName} has no plan. Please add an 'extensions.grafast.plan' callback to this field.`,
           );
         }
         */
 
         if (!typePlan && resultIsPlanned && !fieldHasPlan) {
           throw new Error(
-            `Field ${objectType.name}.${fieldName} returns a ${namedReturnType.name} which expects a plan to be available; however this field has no plan() method to produce such a plan; please add 'extensions.graphile.plan' to this field.`,
+            `Field ${objectType.name}.${fieldName} returns a ${namedReturnType.name} which expects a plan to be available; however this field has no plan() method to produce such a plan; please add 'extensions.grafast.plan' to this field.`,
           );
         }
 
@@ -1281,7 +1283,8 @@ ${te.join(
         listDepth + 1,
       );
     } else if (isScalarType(nullableFieldType)) {
-      const scalarPlanResolver = nullableFieldType.extensions?.graphile?.plan;
+      const scalarPlanResolver = nullableFieldType.extensions?.grafast?.plan;
+      assertNotAsync(scalarPlanResolver, `${nullableFieldType.name}.plan`);
       const $leaf =
         typeof scalarPlanResolver === "function"
           ? withGlobalLayerPlan(parentLayerPlan, polymorphicPaths, () =>
@@ -1322,21 +1325,42 @@ ${te.join(
         locationDetails,
       });
     } else if (isObjectType(nullableFieldType)) {
-      if (isDev) {
-        // Check that the plan we're dealing with is the one the user declared
-        const ExpectedStep = nullableFieldType.extensions?.graphile?.Step;
-        if (ExpectedStep && !($step instanceof ExpectedStep)) {
+      // Check that the plan we're dealing with is the one the user declared
+      /** Either an assertion function or a step class */
+      const stepAssertion = nullableFieldType.extensions?.grafast?.Step;
+      if (stepAssertion) {
+        try {
+          if (
+            stepAssertion === ExecutableStep ||
+            stepAssertion.prototype instanceof ExecutableStep
+          ) {
+            if (!($step instanceof stepAssertion)) {
+              throw new Error(
+                `Step mis-match: expected ${
+                  stepAssertion.name
+                }, but instead found ${
+                  ($step as ExecutableStep).constructor.name
+                } (${$step})`,
+              );
+            }
+          } else {
+            (stepAssertion as ($step: ExecutableStep) => void)($step);
+          }
+        } catch (e) {
           throw new Error(
-            `Step mis-match: expected ${ExpectedStep.name}, but instead found ${
-              ($step as ExecutableStep).constructor.name
-            } (${$step})`,
+            `The step returned by '${path.join(
+              ".",
+            )}' is not compatible with the GraphQL object type '${
+              nullableFieldType.name
+            }': ${e.message}`,
+            { cause: e },
           );
         }
-        if (!selections) {
-          throw new Error(
-            `GraphileInternalError<7fe4f7d1-01d2-4f1e-add6-5aa6936938c9>: no selections on a GraphQLObjectType?!`,
-          );
-        }
+      }
+      if (!selections) {
+        throw new Error(
+          `GrafastInternalError<7fe4f7d1-01d2-4f1e-add6-5aa6936938c9>: no selections on a GraphQLObjectType?!`,
+        );
       }
 
       let objectLayerPlan: LayerPlan;
@@ -1399,12 +1423,12 @@ ${te.join(
       const isInterface = isInterfaceType(nullableFieldType);
       if (!(isUnion || isInterface)) {
         throw new Error(
-          `GraphileInternalError<a54d6d63-d186-4ab9-9299-05f817894300>: Wasn't expecting ${nullableFieldType}`,
+          `GrafastInternalError<a54d6d63-d186-4ab9-9299-05f817894300>: Wasn't expecting ${nullableFieldType}`,
         );
       }
       assert.ok(
         selections,
-        "GraphileInternalError<d94e281c-1a10-463e-b7f5-2b0a3665d99b>: A polymorphic type with no selections is invalid",
+        "GrafastInternalError<d94e281c-1a10-463e-b7f5-2b0a3665d99b>: A polymorphic type with no selections is invalid",
       );
 
       /*
@@ -1541,7 +1565,7 @@ ${te.join(
       const stepBy$stepId = this.stepTracker.getStepById($step.id);
       if (stepByStepId !== stepBy$stepId) {
         throw new Error(
-          `GraphileInternalError<e01bdc40-7c89-41c6-8d84-56efa22c872a>: unexpected inconsistency when determining the polymorphic LayerPlan to use (pathString = ${pathString}, ${stepByStepId} (${stepId}) != ${stepBy$stepId} (${$step.id}))`,
+          `GrafastInternalError<e01bdc40-7c89-41c6-8d84-56efa22c872a>: unexpected inconsistency when determining the polymorphic LayerPlan to use (pathString = ${pathString}, ${stepByStepId} (${stepId}) != ${stepBy$stepId} (${$step.id}))`,
         );
       }
       for (const t of allPossibleObjectTypes) {
@@ -1581,7 +1605,7 @@ ${te.join(
     field: GraphQLField<any, any>,
     trackedArguments: TrackedArguments,
     deduplicate = true,
-  ): { haltTree: boolean; step: ExecutableStep<any> } {
+  ): { haltTree: boolean; step: ExecutableStep } {
     // The step may have been de-duped whilst sibling steps were planned
     // PERF: this should be handled in the parent?
     const parentStep = this.stepTracker.getStepById(rawParentStep.id);
@@ -1637,7 +1661,7 @@ ${te.join(
         stream:
           !haltTree &&
           streamDirective &&
-          isStreamableStep(step as ExecutableStep<any>)
+          isStreamableStep(step as ExecutableStep)
             ? {
                 initialCount:
                   Number(
@@ -1832,7 +1856,7 @@ ${te.join(
     actionDescription: string,
     fromStepId: number,
     order: "dependents-first" | "dependencies-first",
-    callback: (plan: ExecutableStep<any>) => ExecutableStep<any>,
+    callback: (plan: ExecutableStep) => ExecutableStep,
   ): void {
     if (fromStepId === this.stepTracker.stepCount) {
       // Nothing to do since there are no plans to process
@@ -2138,7 +2162,7 @@ ${te.join(
       default: {
         const never: never = step.layerPlan.reason;
         throw new Error(
-          `GraphileInternalError<81e3a7d4-aaa0-416b-abbb-a887734007bc>: unhandled layer plan reason ${inspect(
+          `GrafastInternalError<81e3a7d4-aaa0-416b-abbb-a887734007bc>: unhandled layer plan reason ${inspect(
             never,
           )}`,
         );
@@ -2154,7 +2178,7 @@ ${te.join(
     // All our checks passed, hoist it.
     assert.ok(
       step.layerPlan.parentLayerPlan !== null,
-      "GraphileInternalError<55c8940f-e8ac-4985-8b34-96fc6f81d62d>: A non-root layer plan had no parent?!",
+      "GrafastInternalError<55c8940f-e8ac-4985-8b34-96fc6f81d62d>: A non-root layer plan had no parent?!",
     );
 
     // 1: adjust polymorphicPaths to fit new layerPlan
@@ -2231,7 +2255,7 @@ ${te.join(
       default: {
         const never: never = step.layerPlan.reason;
         throw new Error(
-          `GraphileInternalError<81e3a7d4-aaa0-416b-abbb-a887734009bc>: unhandled layer plan reason ${inspect(
+          `GrafastInternalError<81e3a7d4-aaa0-416b-abbb-a887734009bc>: unhandled layer plan reason ${inspect(
             never,
           )}`,
         );
@@ -2289,7 +2313,7 @@ ${te.join(
 
     if (dependentLayerPlans.has(step.layerPlan)) {
       throw new Error(
-        `GraphileInternalError<c5cefdbc-9aa4-4895-8966-71171d8c0b36>: This should already have been caught`,
+        `GrafastInternalError<c5cefdbc-9aa4-4895-8966-71171d8c0b36>: This should already have been caught`,
       );
     }
 
@@ -2303,7 +2327,7 @@ ${te.join(
         const parent = lp.parentLayerPlan;
         if (!parent) {
           throw new Error(
-            `GraphileInternalError<64c07427-4fe2-43c4-9858-272d33bee0b8>: invalid layer plan heirarchy`,
+            `GrafastInternalError<64c07427-4fe2-43c4-9858-272d33bee0b8>: invalid layer plan heirarchy`,
           );
         }
         lp = parent;
@@ -2351,7 +2375,7 @@ ${te.join(
     const targetPolymorphicPaths = deepest.polymorphicPaths;
     if (!targetPolymorphicPaths.has([...step.polymorphicPaths][0])) {
       throw new Error(
-        `GraphileInternalError<53907e56-940a-4173-979d-bc620e4f1ff8>: polymorphic assumption doesn't hold. Mine = ${[
+        `GrafastInternalError<53907e56-940a-4173-979d-bc620e4f1ff8>: polymorphic assumption doesn't hold. Mine = ${[
           ...step.polymorphicPaths,
         ]}; theirs = ${[...deepest.polymorphicPaths]}`,
       );
@@ -2671,7 +2695,7 @@ ${te.join(
         currentLayerPlan = currentLayerPlan.parentLayerPlan;
         if (!currentLayerPlan) {
           throw new Error(
-            `GraphileInternalError<8c1640b9-fa3c-440d-99e5-7693d0d7e5d1>: could not find layer plan for '${dep}' in chain from layer plan ${layerPlan}`,
+            `GrafastInternalError<8c1640b9-fa3c-440d-99e5-7693d0d7e5d1>: could not find layer plan for '${dep}' in chain from layer plan ${layerPlan}`,
           );
         }
       }
@@ -2758,7 +2782,7 @@ ${te.join(
         if (nextSteps.length === 0) {
           console.log(this.printPlanGraph());
           throw new Error(
-            `GraphileInternalError<2904ebbf-6344-4f2b-9305-8db9c1ff29c5>: Could not compute execution order?! Remaining: ${[
+            `GrafastInternalError<2904ebbf-6344-4f2b-9305-8db9c1ff29c5>: Could not compute execution order?! Remaining: ${[
               ...pending,
             ]} (processed: ${[...processed]}; all: ${layerPlan.pendingSteps})`,
           );
@@ -2973,7 +2997,7 @@ ${te.join(
 }
 
 function makeDefaultPlan(fieldName: string) {
-  return ($step: ExecutableStep<any>) => access($step, [fieldName]);
+  return ($step: ExecutableStep) => access($step, [fieldName]);
 }
 function isMaybeAPeer(
   step: ExecutableStep,

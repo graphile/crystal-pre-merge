@@ -10,7 +10,7 @@ import type {
   ObjectStep,
   PromiseOrDirect,
 } from "grafast";
-import { defer, isAsyncIterable, isDev } from "grafast";
+import { defer, exportAs, isAsyncIterable, isDev } from "grafast";
 import type { SQLRawValue } from "pg-sql2";
 
 import { formatSQLForDebugging } from "./formatSQLForDebugging.js";
@@ -117,7 +117,7 @@ export type PgExecutorSubscribeOptions = {
 
 /**
  * Represents a PostgreSQL database connection, can be used for issuing queries
- * to the database. Used by PgSource but also directly by things like
+ * to the database. Used by PgResource but also directly by things like
  * PgSimpleFunctionCallStep. Was once PgDataSource itself. Multiple PgExecutors
  * can exist in the same schema. PgExecutor is also responsible for things like
  * caching.
@@ -141,7 +141,7 @@ export class PgExecutor<TSettings = any> {
     return chalk.bold.blue(`PgExecutor(${this.name})`);
   }
 
-  // public context(): ExecutableStep<any>
+  // public context(): ExecutableStep
   public context(): ObjectStep<PgExecutorContextPlans<TSettings>> {
     return this.contextCallback();
   }
@@ -580,7 +580,7 @@ ${duration}
 
         if (batchIndexesByIdentifiersJSON.size <= 0) {
           throw new Error(
-            "GraphileInternalError<98699a62-cd44-4372-8e92-d730b116a51d>: empty batch doesn't make sense in this context.",
+            "GrafastInternalError<98699a62-cd44-4372-8e92-d730b116a51d>: empty batch doesn't make sense in this context.",
           );
         }
 
@@ -718,7 +718,7 @@ ${duration}
             const batchIndexes = batchIndexesByValueIndex[valueIndex];
             if (!batchIndexes) {
               throw new Error(
-                `GraphileInternalError<8f513ceb-a3dc-4ec7-9ca1-0f0d4576a22d>: could not determine the identifier JSON for value index '${valueIndex}'`,
+                `GrafastInternalError<8f513ceb-a3dc-4ec7-9ca1-0f0d4576a22d>: could not determine the identifier JSON for value index '${valueIndex}'`,
               );
             }
             for (let i = 0, l = batchIndexes.length; i < l; i++) {
@@ -806,6 +806,4 @@ ${duration}
   }
 }
 
-Object.defineProperty(PgExecutor, "$$export", {
-  value: { moduleName: "@dataplan/pg", exportName: "PgExecutor" },
-});
+exportAs("@dataplan/pg", PgExecutor, "PgExecutor");

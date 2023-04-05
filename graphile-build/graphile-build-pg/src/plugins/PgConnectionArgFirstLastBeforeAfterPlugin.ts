@@ -6,7 +6,7 @@ import type {
   PgSelectSingleStep,
   PgSelectStep,
 } from "@dataplan/pg";
-import type { ConnectionStep, GraphileFieldConfigArgumentMap } from "grafast";
+import type { ConnectionStep, GrafastFieldConfigArgumentMap } from "grafast";
 import { EXPORTABLE } from "graphile-export";
 
 import { version } from "../version.js";
@@ -42,7 +42,7 @@ export const PgConnectionArgFirstLastBeforeAfterPlugin: GraphileConfig.Plugin =
   };
 
 function commonFn(
-  args: GraphileFieldConfigArgumentMap<any, any, any, any>,
+  args: GrafastFieldConfigArgumentMap<any, any, any, any>,
   build: GraphileBuild.Build,
   context:
     | GraphileBuild.ContextObjectFieldsFieldArgs
@@ -59,7 +59,7 @@ function commonFn(
     fieldName,
     isPgFieldConnection,
     isPgFieldSimpleCollection,
-    pgSource,
+    pgResource,
     pgFieldCodec,
   } = scope;
 
@@ -67,11 +67,12 @@ function commonFn(
     return args;
   }
 
-  const codec = pgFieldCodec ?? pgSource?.codec;
-  const isSuitableSource = pgSource && !pgSource.isUnique;
+  const codec = pgFieldCodec ?? pgResource?.codec;
+  const isSuitableSource = pgResource && !pgResource.isUnique;
   const isSuitableCodec =
     codec &&
-    (isSuitableSource || (!pgSource && codec?.polymorphism?.mode === "union"));
+    (isSuitableSource ||
+      (!pgResource && codec?.polymorphism?.mode === "union"));
 
   if (!isSuitableCodec) {
     return args;
@@ -93,9 +94,9 @@ function commonFn(
             function plan(
               _: any,
               $connection: ConnectionStep<
-                PgSelectSingleStep<any, any, any, any>,
+                PgSelectSingleStep,
                 PgSelectParsedCursorStep,
-                PgSelectStep<any, any, any, any>
+                PgSelectStep
               >,
               arg,
             ) {
@@ -117,9 +118,9 @@ function commonFn(
                   function plan(
                     _: any,
                     $connection: ConnectionStep<
-                      PgSelectSingleStep<any, any, any, any>,
+                      PgSelectSingleStep,
                       PgSelectParsedCursorStep,
-                      PgSelectStep<any, any, any, any>
+                      PgSelectStep
                     >,
                     val,
                   ) {
@@ -143,9 +144,9 @@ function commonFn(
             function plan(
               _: any,
               $connection: ConnectionStep<
-                PgSelectSingleStep<any, any, any, any>,
+                PgSelectSingleStep,
                 PgSelectParsedCursorStep,
-                PgSelectStep<any, any, any, any>
+                PgSelectStep
               >,
               val,
             ) {
@@ -167,9 +168,9 @@ function commonFn(
                   function plan(
                     _: any,
                     $connection: ConnectionStep<
-                      PgSelectSingleStep<any, any, any, any>,
+                      PgSelectSingleStep,
                       PgSelectParsedCursorStep,
-                      PgSelectStep<any, any, any, any>
+                      PgSelectStep
                     >,
                     val,
                   ) {
@@ -189,9 +190,9 @@ function commonFn(
                   function plan(
                     _: any,
                     $connection: ConnectionStep<
-                      PgSelectSingleStep<any, any, any, any>,
+                      PgSelectSingleStep,
                       PgSelectParsedCursorStep,
-                      PgSelectStep<any, any, any, any>
+                      PgSelectStep
                     >,
                     val,
                   ) {
@@ -202,7 +203,7 @@ function commonFn(
             },
           }
         : null),
-    } as GraphileFieldConfigArgumentMap<any, any, any, any>,
+    } as GrafastFieldConfigArgumentMap<any, any, any, any>,
     isPgFieldConnection
       ? `Adding connection pagination args to field '${fieldName}' of '${Self.name}'`
       : `Adding simple collection args to field '${fieldName}' of '${Self.name}'`,

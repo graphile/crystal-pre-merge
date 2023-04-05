@@ -44,7 +44,7 @@ export interface ListTransformOptions<
     TMemo,
     TDepsStep extends ExecutableStep<infer U> ? U : never
   >;
-  listItem?(itemPlan: ExecutableStep<any>): TItemStep;
+  listItem?(itemPlan: ExecutableStep): TItemStep;
   finalizeCallback?(data: TMemo): TMemo;
   meta?: string;
   optimize?: (
@@ -62,10 +62,12 @@ export interface ListTransformOptions<
  * functions that uses this under the hood such as `filter()`.
  */
 export class __ListTransformStep<
-  TListStep extends ExecutableStep<readonly any[]>,
-  TDepsStep extends ExecutableStep,
-  TMemo,
-  TItemStep extends ExecutableStep | undefined = undefined,
+  TListStep extends ExecutableStep<readonly any[]> = ExecutableStep<
+    readonly any[]
+  >,
+  TDepsStep extends ExecutableStep = ExecutableStep,
+  TMemo = any,
+  TItemStep extends ExecutableStep | undefined = ExecutableStep | undefined,
 > extends ExecutableStep<TMemo> {
   static $$export = {
     moduleName: "grafast",
@@ -194,6 +196,7 @@ export class __ListTransformStep<
   }
 
   async execute(
+    _count: number,
     values: [GrafastValuesList<any[] | null | undefined | GrafastError>],
     extra: ExecutionExtra,
   ): Promise<GrafastResultsList<TMemo>> {
@@ -211,7 +214,7 @@ export class __ListTransformStep<
     const itemStepId = this.opPlan.dangerouslyGetStep(this.itemStepId).id;
     if (itemStepId == null) {
       throw new Error(
-        "GraphileInternalError<b3a2bff9-15c6-47e2-aa82-19c862324f1a>: listItem layer plan has no rootStepId",
+        "GrafastInternalError<b3a2bff9-15c6-47e2-aa82-19c862324f1a>: listItem layer plan has no rootStepId",
       );
     }
     store.set(itemStepId, []);
@@ -221,7 +224,7 @@ export class __ListTransformStep<
       store.set(planId, []);
       if (!bucket.store.has(planId)) {
         throw new Error(
-          `GraphileInternalError<14f2b4c6-f951-44d6-ad6b-2eace3330b84>: plan '${planId}' (${this.layerPlan.operationPlan.dangerouslyGetStep(
+          `GrafastInternalError<14f2b4c6-f951-44d6-ad6b-2eace3330b84>: plan '${planId}' (${this.layerPlan.operationPlan.dangerouslyGetStep(
             planId,
           )}) listed in copyStepIds but not available in parent bucket for ${this}`,
         );
@@ -285,7 +288,7 @@ export class __ListTransformStep<
         assert.strictEqual(
           list.length,
           values.length,
-          "GraphileInternalError<c85b6936-d406-4801-9c6b-625a567d32ff>: The list and values length must match for a __ListTransformStep",
+          "GrafastInternalError<c85b6936-d406-4801-9c6b-625a567d32ff>: The list and values length must match for a __ListTransformStep",
         );
       }
       const initialState = this.initialState();

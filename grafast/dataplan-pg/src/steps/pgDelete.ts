@@ -1,17 +1,22 @@
-import type { GrafastResultsList, GrafastValuesList } from "grafast";
-import { ExecutableStep, isDev, SafeError } from "grafast";
+import type {
+  GrafastResultsList,
+  GrafastValuesList,
+  PromiseOrDirect,
+} from "grafast";
+import { ExecutableStep, exportAs, isDev, SafeError } from "grafast";
 import type { SQL, SQLRawValue } from "pg-sql2";
 import sql from "pg-sql2";
 
-import type { PgTypeColumn, PgTypeColumns } from "../codecs.js";
-import type {
-  PgSource,
-  PgSourceRelation,
-  PgSourceRow,
-  PgSourceUnique,
-} from "../datasource.js";
+import type { PgCodecAttribute } from "../codecs.js";
+import type { PgResource, PgResourceUnique } from "../index.js";
 import { inspect } from "../inspect.js";
-import type { PgTypeCodec, PlanByUniques } from "../interfaces.js";
+import type {
+  GetPgResourceCodec,
+  GetPgResourceColumns,
+  GetPgResourceUniques,
+  PgCodec,
+  PlanByUniques,
+} from "../interfaces.js";
 import type { PgClassExpressionStep } from "./pgClassExpression.js";
 import { pgClassExpression } from "./pgClassExpression.js";
 
@@ -35,14 +40,8 @@ interface PgDeletePlanFinalizeResults {
  * Deletes a row in the database, can return columns from the deleted row.
  */
 export class PgDeleteStep<
-  TColumns extends PgTypeColumns | undefined,
-  TUniques extends ReadonlyArray<PgSourceUnique<Exclude<TColumns, undefined>>>,
-  TRelations extends {
-    [identifier: string]: TColumns extends PgTypeColumns
-      ? PgSourceRelation<TColumns, any>
-      : never;
-  },
-> extends ExecutableStep<PgSourceRow<TColumns>> {
+  TResource extends PgResource<any, any, any, any, any> = PgResource,
+> extends ExecutableStep<unknown[]> {
   static $$export = {
     moduleName: "@dataplan/pg",
     exportName: "PgDeleteStep",
@@ -55,10 +54,10 @@ export class PgDeleteStep<
    * Tells us what we're dealing with - data type, columns, where to delete it
    * from, what it's called, etc.
    */
-  public readonly source: PgSource<TColumns, TUniques, TRelations>;
+  public readonly resource: TResource;
 
   /**
-   * This defaults to the name of the source but you can override it. Aids
+   * This defaults to the name of the resource but you can override it. Aids
    * in debugging.
    */
   private readonly name: string;
@@ -76,9 +75,9 @@ export class PgDeleteStep<
    * The columns and their dependency ids for us to find the record by.
    */
   private getBys: Array<{
-    name: keyof TColumns;
+    name: keyof GetPgResourceColumns<TResource>;
     depId: number;
-    pgCodec: PgTypeCodec<any, any, any>;
+    pgCodec: PgCodec;
   }> = [];
 
   /**
@@ -105,31 +104,34 @@ export class PgDeleteStep<
   private selects: Array<SQL> = [];
 
   constructor(
-    source: PgSource<TColumns, TUniques, TRelations>,
-    getBy: PlanByUniques<TColumns, TUniques>,
+    resource: TResource,
+    getBy: PlanByUniques<
+      GetPgResourceColumns<TResource>,
+      GetPgResourceUniques<TResource>
+    >,
   ) {
     super();
-    this.source = source;
-    this.name = source.name;
+    this.resource = resource;
+    this.name = resource.name;
     this.symbol = Symbol(this.name);
     this.alias = sql.identifier(this.symbol);
-    this.contextId = this.addDependency(this.source.context());
+    this.contextId = this.addDependency(this.resource.executor.context());
 
-    const keys: ReadonlyArray<keyof TColumns> = getBy
-      ? (Object.keys(getBy) as Array<keyof TColumns>)
+    const keys: ReadonlyArray<keyof GetPgResourceColumns<TResource>> = getBy
+      ? (Object.keys(getBy) as Array<keyof GetPgResourceColumns<TResource>>)
       : [];
 
     if (
-      !this.source.uniques.some((uniq) =>
+      !(this.resource.uniques as PgResourceUnique[]).some((uniq) =>
         uniq.columns.every((key) => keys.includes(key as any)),
       )
     ) {
       throw new Error(
         `Attempted to build 'PgDeleteStep' with a non-unique getBy keys ('${keys.join(
           "', '",
-        )}') - please ensure your 'getBy' spec uniquely identifiers a row (source = ${
-          this.source
-        }; supported uniques = ${inspect(this.source.uniques)}).`,
+        )}') - please ensure your 'getBy' spec uniquely identifiers a row (resource = ${
+          this.resource
+        }; supported uniques = ${inspect(this.resource.uniques)}).`,
       );
     }
 
@@ -145,7 +147,9 @@ export class PgDeleteStep<
       }
       const value = (getBy as any)![name as any];
       const depId = this.addDependency(value);
-      const column = this.source.codec.columns![name] as PgTypeColumn;
+      const column = (
+        this.resource.codec.columns as GetPgResourceColumns<TResource>
+      )[name];
       const pgCodec = column.codec;
       this.getBys.push({ name, depId, pgCodec });
     });
@@ -155,24 +159,21 @@ export class PgDeleteStep<
    * Returns a plan representing a named attribute (e.g. column) from the newly
    * deleteed row.
    */
-  get<TAttr extends keyof TColumns>(
+  get<TAttr extends keyof GetPgResourceColumns<TResource>>(
     attr: TAttr,
   ): PgClassExpressionStep<
-    TColumns extends PgTypeColumns ? TColumns[TAttr]["codec"]["columns"] : any,
-    TColumns extends PgTypeColumns ? TColumns[TAttr]["codec"] : any,
-    TColumns,
-    TUniques,
-    TRelations
+    GetPgResourceColumns<TResource>[TAttr]["codec"],
+    TResource
   > {
-    const dataSourceColumn: PgTypeColumn =
-      this.source.codec.columns![attr as string];
-    if (!dataSourceColumn) {
+    const resourceColumn: PgCodecAttribute =
+      this.resource.codec.columns![attr as string];
+    if (!resourceColumn) {
       throw new Error(
-        `${this.source} does not define an attribute named '${String(attr)}'`,
+        `${this.resource} does not define an attribute named '${String(attr)}'`,
       );
     }
 
-    if (dataSourceColumn?.via) {
+    if (resourceColumn?.via) {
       throw new Error(`Cannot select a 'via' column from PgDeleteStep`);
     }
 
@@ -187,28 +188,21 @@ export class PgDeleteStep<
      *   decoding these string values.
      */
 
-    const sqlExpr = pgClassExpression(this, dataSourceColumn.codec);
-    const colPlan = dataSourceColumn.expression
-      ? sqlExpr`${sql.parens(dataSourceColumn.expression(this.alias))}`
+    const sqlExpr = pgClassExpression(this, resourceColumn.codec);
+    const colPlan = resourceColumn.expression
+      ? sqlExpr`${sql.parens(resourceColumn.expression(this.alias))}`
       : sqlExpr`${this.alias}.${sql.identifier(String(attr))}`;
     return colPlan as any;
   }
 
   public record(): PgClassExpressionStep<
-    TColumns,
-    PgTypeCodec<TColumns, any, any>,
-    TColumns,
-    TUniques,
-    TRelations
+    GetPgResourceCodec<TResource>,
+    TResource
   > {
-    return pgClassExpression<
-      TColumns,
-      PgTypeCodec<TColumns, any, any>,
-      TColumns,
-      TUniques,
-      TRelations,
-      undefined
-    >(this, this.source.codec)`${this.alias}`;
+    return pgClassExpression<GetPgResourceCodec<TResource>, TResource>(
+      this,
+      this.resource.codec as GetPgResourceCodec<TResource>,
+    )`${this.alias}`;
   }
 
   /**
@@ -246,6 +240,7 @@ export class PgDeleteStep<
    * the plans stored in this.identifiers to get actual values we can use.
    */
   async execute(
+    count: number,
     values: Array<GrafastValuesList<any>>,
   ): Promise<GrafastResultsList<any>> {
     if (!this.finalizeResults) {
@@ -257,7 +252,10 @@ export class PgDeleteStep<
     // We must execute each mutation on its own, but we can at least do so in
     // parallel. Note we return a list of promises, each may reject or resolve
     // without causing the others to reject.
-    return values[this.contextId].map(async (context, i) => {
+    const result: Array<PromiseOrDirect<any>> = [];
+    const list = values[this.contextId];
+    for (let i = 0; i < count; i++) {
+      const context = list[i];
       const sqlValues = queryValueDetailsBySymbol.size
         ? rawSqlValues.map((v) => {
             if (typeof v === "symbol") {
@@ -272,36 +270,38 @@ export class PgDeleteStep<
             }
           })
         : rawSqlValues;
-      const { rows, rowCount } = await this.source.executeMutation({
+      const promise = this.resource.executeMutation({
         context,
         text,
         values: sqlValues,
       });
-      return (
-        rows[0] ??
-        (rowCount === 0
-          ? Promise.reject(
-              new Error(
-                `No values were deleted in collection '${this.source.name}' because no values you can delete were found matching these criteria.`,
-              ),
-            )
-          : Object.create(null))
+      result[i] = promise.then(
+        ({ rows, rowCount }) =>
+          rows[0] ??
+          (rowCount === 0
+            ? Promise.reject(
+                new Error(
+                  `No values were deleted in collection '${this.resource.name}' because no values you can delete were found matching these criteria.`,
+                ),
+              )
+            : Object.create(null)),
       );
-    });
+    }
+    return result;
   }
 
   public finalize(): void {
     if (!this.isFinalized) {
       this.locked = true;
-      const sourceSource = this.source.source;
-      if (!sql.isSQL(sourceSource)) {
+      const resourceSource = this.resource.source;
+      if (!sql.isSQL(resourceSource)) {
         throw new Error(
           `Error in ${this}: can only delete into sources defined as SQL, however ${
-            this.source
-          } has ${inspect(this.source.source)}`,
+            this.resource
+          } has ${inspect(this.resource.source)}`,
         );
       }
-      const table = sql`${sourceSource} as ${this.alias}`;
+      const table = sql`${resourceSource} as ${this.alias}`;
 
       const fragmentsWithAliases = this.selects.map(
         (frag, idx) => sql`${frag} as ${sql.identifier(String(idx))}`,
@@ -373,26 +373,16 @@ export class PgDeleteStep<
 }
 
 /**
- * Delete a row in `source` identified by the `getBy` unique condition.
+ * Delete a row in `resource` identified by the `getBy` unique condition.
  */
-export function pgDelete<
-  TColumns extends PgTypeColumns | undefined,
-  TUniques extends ReadonlyArray<PgSourceUnique<Exclude<TColumns, undefined>>>,
-  TRelations extends {
-    [identifier: string]: TColumns extends PgTypeColumns
-      ? PgSourceRelation<TColumns, any>
-      : never;
-  },
->(
-  source: PgSource<TColumns, TUniques, TRelations>,
-  getBy: PlanByUniques<TColumns, TUniques>,
-): PgDeleteStep<TColumns, TUniques, TRelations> {
-  return new PgDeleteStep(source, getBy);
+export function pgDelete<TResource extends PgResource<any, any, any, any>>(
+  resource: TResource,
+  getBy: PlanByUniques<
+    GetPgResourceColumns<TResource>,
+    GetPgResourceUniques<TResource>
+  >,
+): PgDeleteStep<TResource> {
+  return new PgDeleteStep(resource, getBy);
 }
 
-Object.defineProperty(pgDelete, "$$export", {
-  value: {
-    moduleName: "@dataplan/pg",
-    exportName: "pgDelete",
-  },
-});
+exportAs("@dataplan/pg", pgDelete, "pgDelete");
