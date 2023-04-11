@@ -19,7 +19,6 @@ import type {
   __TrackedValueStep,
   AccessStep,
   BaseGraphQLRootValue,
-  FieldArgs,
   GrafastArgumentConfig,
   GrafastFieldConfig,
   GrafastSubscriber,
