@@ -19,6 +19,7 @@ import type {
   __TrackedValueStep,
   AccessStep,
   BaseGraphQLRootValue,
+  FieldArgs,
   GrafastArgumentConfig,
   GrafastFieldConfig,
   GrafastSubscriber,
@@ -4386,9 +4387,7 @@ export function makeExampleSchema(
             sql,
             thirdPartyVulnerabilitiesResource,
           ) =>
-            function plan(_, fieldArgs) {
-              const $first = fieldArgs.getRaw("first");
-              const $offset = fieldArgs.getRaw("offset");
+            function plan(_, { $: { $$first, $$offset } }) {
               // IMPORTANT: for cursor pagination, type must be part of cursor condition
               const $vulnerabilities = pgUnionAll({
                 attributes: {
@@ -4414,8 +4413,8 @@ export function makeExampleSchema(
                     TYPES.float,
                   )}`,
               });
-              $vulnerabilities.setFirst($first);
-              $vulnerabilities.setOffset($offset);
+              $vulnerabilities.setFirst($$first!);
+              $vulnerabilities.setOffset($$offset!);
               return $vulnerabilities;
             },
           [

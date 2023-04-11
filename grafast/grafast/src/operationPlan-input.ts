@@ -492,7 +492,51 @@ function withFieldArgsForArgumentsOrInputObject<
     */
       return step;
     },
+    $: makeAccessor(fields),
   };
+
+  function makeAccessor(
+    fields: Record<string, GraphQLArgument | GraphQLInputField> | null,
+    path: string[] = [],
+  ) {
+    const $ = Object.create(null);
+
+    // Now define accessors for known properties
+    if (fields) {
+      for (const fieldName of Object.keys(fields)) {
+        const field = fields[fieldName];
+        const nullableType = getNullableType(field.type);
+        if (isInputObjectType(nullableType)) {
+          Object.defineProperty($, fieldName, {
+            get() {
+              return makeAccessor(nullableType.getFields(), [
+                ...path,
+                fieldName,
+              ]);
+            },
+            enumerable: true,
+            configurable: false,
+          });
+        }
+        Object.defineProperty($, `$${fieldName}`, {
+          get() {
+            return fieldArgs.get([...path, fieldName]);
+          },
+          enumerable: true,
+          configurable: false,
+        });
+        Object.defineProperty($, `$$${fieldName}`, {
+          get() {
+            return fieldArgs.getRaw([...path, fieldName]);
+          },
+          enumerable: true,
+          configurable: false,
+        });
+      }
+    }
+    return $;
+  }
+
   const step = (callback(fieldArgs) ?? parentPlan) as
     | ExecutableStep
     | ModifierStep;

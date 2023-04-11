@@ -337,9 +337,9 @@ type PathTuple<
   : never;
 
 // TODO: rename
-export interface FieldArgs<
+export type FieldArgs<
   TInput extends Record<string, any> = Record<string, any>,
-> {
+> = {
   /** Gets the value, evaluating the `inputPlan` at each field if appropriate */
   get(path?: keyof TInput | [] | PathTuple<TInput>): ExecutableStep;
   /** Gets the value *without* calling any `inputPlan`s */
@@ -349,7 +349,48 @@ export interface FieldArgs<
     $target: TargetStepOrCallback,
     path?: keyof TInput | [] | PathTuple<TInput>,
   ): void;
-}
+} & {
+  /**
+   * EXPERIMENTAL!
+   *
+   * @experimental
+   */
+  $: FieldArgsSteps<TInput>;
+};
+
+// Record<`${string & keyof TObj}`, FieldArgs<TObj[TKey]>> &
+type NestedFieldArgsSteps<
+  TObj extends Record<string, any>,
+  TKey extends keyof TObj = keyof TObj,
+> = TKey extends TKey
+  ? // If key is 'string' or 'any' then we want to stop
+    "$IS_STRING_OR_ANY$" extends TKey
+    ? never
+    : // Otherwise, key must be a specific union of strings, so distribute across
+      // these and if the value there is another record (but not an array), do it all
+      // again!
+      Record<
+        TKey,
+        TObj[TKey] extends Record<string, any> | null | undefined
+          ? // This `(foo ? 1 : 0) extends 0` catches when `foo = 0 | 1` - we
+            // only want to continue when it's DEFINITELY a record, and not an
+            // array, any, etc.
+            (
+              TObj[TKey] extends ReadonlyArray<any> | null | undefined ? 1 : 0
+            ) extends 0
+            ? FieldArgsSteps<NonNullable<TObj[TKey]>>
+            : []
+          : []
+      >
+  : never;
+
+type FieldArgsSteps<TObj extends Record<string, any>> =
+  "$IS_STRING_OR_ANY$" extends keyof TObj
+    ? Record<`$${string}`, ExecutableStep | undefined> &
+        Record<`$$${string}`, InputStep | undefined>
+    : NestedFieldArgsSteps<TObj> &
+        Record<`$${string & keyof TObj}`, ExecutableStep> &
+        Record<`$$${string & keyof TObj}`, InputStep>;
 
 export interface FieldInfo {
   field: GraphQLField<any, any, any>;
