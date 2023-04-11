@@ -403,7 +403,7 @@ function withFieldArgsForArgumentsOrInputObject<
     }
   }
 
-  const fieldArgs: FieldArgs = {
+  const fieldArgs: FieldArgs<Record<string, any>> = {
     get(path) {
       if (!path || (Array.isArray(path) && path.length === 0)) {
         analyzedCoordinates[""] = true;

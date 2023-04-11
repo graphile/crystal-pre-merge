@@ -313,14 +313,42 @@ export type TargetStepOrCallback =
   | ModifierStep
   | ((indexOrFieldName: number | string) => TargetStepOrCallback);
 
+type PathTuple<
+  TObj extends Record<string, any>,
+  TKey extends keyof TObj = keyof TObj,
+> = TKey extends TKey
+  ? // If key is 'string' or 'any' then we just want to return a `string[]`
+    "$IS_STRING_OR_ANY$" extends TKey
+    ? string[]
+    : // Otherwise, key must be a specific union of strings, so distribute across
+      // these and if the value there is another record (but not an array), do it all
+      // again!
+      [
+        TKey,
+        ...(TObj[TKey] extends Record<string, any>
+          ? // This `(foo ? 1 : 0) extends 0` catches when `foo = 0 | 1` - we
+            // only want to continue when it's DEFINITELY a record, and not an
+            // array, any, etc.
+            (TObj[TKey] extends ReadonlyArray<any> ? 1 : 0) extends 0
+            ? [] | PathTuple<TObj[TKey]>
+            : []
+          : []),
+      ]
+  : never;
+
 // TODO: rename
-export interface FieldArgs {
+export interface FieldArgs<
+  TInput extends Record<string, any> = Record<string, any>,
+> {
   /** Gets the value, evaluating the `inputPlan` at each field if appropriate */
-  get(path?: string | string[]): ExecutableStep;
+  get(path?: keyof TInput | [] | PathTuple<TInput>): ExecutableStep;
   /** Gets the value *without* calling any `inputPlan`s */
-  getRaw(path?: string | string[]): InputStep;
+  getRaw(path?: keyof TInput | [] | PathTuple<TInput>): InputStep;
   /** This also works (without path) to apply each list entry against $target */
-  apply($target: TargetStepOrCallback, path?: string | string[]): void;
+  apply(
+    $target: TargetStepOrCallback,
+    path?: keyof TInput | [] | PathTuple<TInput>,
+  ): void;
 }
 
 export interface FieldInfo {
