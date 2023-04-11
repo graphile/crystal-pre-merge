@@ -37,7 +37,7 @@ even have to have the column in your GraphQL schema in order to set it any more!
 makeWrapPlansPlugin({
   Mutation: {
     // This same pattern works for 'update' mutations too
-    createPost(plan, $source, { $: { $firstName, $lastName } }) {
+    createPost(plan, $source, { $firstName, $lastName }) {
       // Call the original plan
       const $planResult = plan();
 

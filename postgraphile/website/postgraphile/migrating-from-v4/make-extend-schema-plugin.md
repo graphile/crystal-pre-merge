@@ -126,7 +126,7 @@ in JS, you might use the `pgClassExpression` step.
      `,
 +    plans: {
 +      User: {
-+        nameWithSuffix($user, { $: { $suffix } }) {
++        nameWithSuffix($user, { $suffix }) {
 +          const $name = $user.get('name');
 +          return pgClassExpression(
 +            $user,
@@ -154,7 +154,7 @@ A more performant (and simpler) solution to this would have been:
 ```diff
 +    plans: {
 +      User: {
-+        nameWithSuffix($user, { $: { $suffix } }) {
++        nameWithSuffix($user, { $suffix }) {
 +          return lambda(
 +            [$user.get("name"), $suffix],
 +            ([name, suffix]) => `${name} ${suffix}`,
@@ -211,7 +211,7 @@ function, passing through the `searchText` argument.
 -    },
 +    plans: {
 +      Query: {
-+        matchingUser($parent, { $: { $searchText } }) {
++        matchingUser($parent, { $searchText }) {
 +          return matchUser.execute({
 +            step: $searchText,
 +          });

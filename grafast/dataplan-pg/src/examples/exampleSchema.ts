@@ -4387,7 +4387,7 @@ export function makeExampleSchema(
             sql,
             thirdPartyVulnerabilitiesResource,
           ) =>
-            function plan(_, { $: { $$first, $$offset } }) {
+            function plan(_, { $$first, $$offset }) {
               // IMPORTANT: for cursor pagination, type must be part of cursor condition
               const $vulnerabilities = pgUnionAll({
                 attributes: {

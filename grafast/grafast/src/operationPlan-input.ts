@@ -495,6 +495,25 @@ function withFieldArgsForArgumentsOrInputObject<
     $: makeAccessor(fields),
   };
 
+  if (fields) {
+    for (const fieldName of Object.keys(fields)) {
+      Object.defineProperty(fieldArgs, `$${fieldName}`, {
+        get() {
+          return fieldArgs.get(fieldName);
+        },
+        enumerable: true,
+        configurable: false,
+      });
+      Object.defineProperty(fieldArgs, `$$${fieldName}`, {
+        get() {
+          return fieldArgs.getRaw(fieldName);
+        },
+        enumerable: true,
+        configurable: false,
+      });
+    }
+  }
+
   function makeAccessor(
     fields: Record<string, GraphQLArgument | GraphQLInputField> | null,
     path: string[] = [],

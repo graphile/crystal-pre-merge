@@ -356,7 +356,16 @@ export type FieldArgs<
    * @experimental
    */
   $: FieldArgsSteps<TInput>;
-};
+} & Record<
+    // Shortcuts to .$.$foo
+    `$${string & keyof TInput}`,
+    ExecutableStep
+  > &
+  Record<
+    // Shortcuts to .$.$$foo
+    `$$${string & keyof TInput}`,
+    InputStep
+  >;
 
 // Record<`${string & keyof TObj}`, FieldArgs<TObj[TKey]>> &
 type NestedFieldArgsSteps<

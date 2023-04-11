@@ -159,7 +159,7 @@ const typeDefs = /* GraphQL */ `
 
 const plans = {
   Mutation: {
-    updateUser(parent, { $: { $id } }) {
+    updateUser(parent, { $id }) {
       // Turn the $id into a specifier:
       const spec = specFromNodeId(base64JSONCodec, userHandler, $id);
 

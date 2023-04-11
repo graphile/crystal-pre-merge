@@ -28,7 +28,7 @@ const schema = makeGrafastSchema({
   `,
   plans: {
     Query: {
-      add(_, { $: { $a, $b } }) {
+      add(_, { $a, $b }) {
         return lambda([$a, $b], ([a, b]) => a + b);
       },
       userId() {
