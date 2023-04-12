@@ -943,3 +943,4 @@ export type UnwrapPlanTuple</* const */ TIn extends readonly ExecutableStep[]> =
   } & { length: number };
 
 export type NotVariableValueNode = Exclude<ValueNode, VariableNode>;
+export type Maybe<T> = T | null | undefined;

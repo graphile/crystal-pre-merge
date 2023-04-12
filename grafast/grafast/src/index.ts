@@ -81,6 +81,7 @@ import {
   StepOptimizeOptions,
   StepStreamOptions,
   TypedEventEmitter,
+  Maybe,
 } from "./interfaces.js";
 import { polymorphicWrap } from "./polymorphic.js";
 import {
@@ -387,6 +388,7 @@ export {
   stripAnsi,
   subscribe,
   TypedEventEmitter,
+  Maybe,
   UnbatchedExecutableStep,
 };
 
