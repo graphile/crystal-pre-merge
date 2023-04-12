@@ -395,8 +395,7 @@ type NestedFieldArgsSteps<
 
 type FieldArgsSteps<TObj extends Record<string, any>> =
   "$IS_STRING_OR_ANY$" extends keyof TObj
-    ? Record<`$${string}`, ExecutableStep | undefined> &
-        Record<`$$${string}`, InputStep | undefined>
+    ? Record<string, any>
     : NestedFieldArgsSteps<TObj> &
         Record<`$${string & keyof TObj}`, ExecutableStep> &
         Record<`$$${string & keyof TObj}`, InputStep>;
