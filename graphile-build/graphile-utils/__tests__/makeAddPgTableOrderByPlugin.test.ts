@@ -122,8 +122,6 @@ const getAscDescData = async (schemaResult: SchemaResult) => {
     {},
   )) as ExecutionResult;
 
-  console.dir(errorsAsc);
-
   const userNodesAsc = (dataAsc?.allUsers as any)?.nodes;
   const userNodesDesc = (dataDesc?.allUsers as any)?.nodes;
 
