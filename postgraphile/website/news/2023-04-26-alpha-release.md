@@ -21,7 +21,7 @@ January marked a big milestone for PostGraphile Version 5, when it began the pre
 
 Throughout the prealpha phase we smoothed the edges, closed gaps, tidied APIs, discovered which pieces of terminology worked and which did not, and did a lot of API restructuring and stabilization.
 
-With thanks to everyone in the V5 testing community - and a special shout out for the excellent and continued feedback from our sponsors dfg, hov, James, Josiah and the Netflix team, mattste, Simon, and Timo - we are in a much better shape three months on. We now have a [detailed migration guide](../postgraphile/next/migrating-from-v4/), [updated docs](../postgraphile/next/), an enhanced developer experience and much improved backwards compatibility!
+With thanks to everyone in the V5 testing community - and a special shout out for the excellent and continued feedback from our sponsors dfg, hov, James, Josiah and the Netflix team, mattste, Simon, and Timo - we are in a much better shape three months on. We now have a [detailed migration guide](/postgraphile/next/migrating-from-v4), [updated docs](/postgraphile/next), an enhanced developer experience and much improved backwards compatibility!
 
 ### What’s new in Version 5?
 
