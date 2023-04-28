@@ -138,6 +138,16 @@ const config = {
             position: "left",
           },
           {
+            to: "https://www.graphile.org/support/",
+            label: "Support",
+            position: "left",
+          },
+          {
+            to: "https://www.graphile.org/sponsor/",
+            label: "Sponsor",
+            position: "left",
+          },
+          {
             type: "docsVersionDropdown",
             position: "right",
             // dropdownItemsAfter: [{ to: "/versions", label: "All versions" }],
