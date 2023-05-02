@@ -18,6 +18,32 @@
 
 .buttons {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-transform: uppercase;
+}
+
+.buttonHero {
+  font-size: 0.8rem;
+  border-radius: 7px;
+  border: 1px solid var(--ifm-color-primary);
+}
+
+.buttonHeroOutline {
+  color: var(--ifm-color-primary);
+}
+
+.buttonHeroOutline:hover {
+  border: 1px solid var(--ifm-color-primary-dark);
+  color: var(--ifm-color-primary-dark);
+}
+
+.hero {
+  color: var(--ifm-color-primary-darkest);
+  font-size: 2.5rem;
+  text-align: left;
+}
+
+.heroImage {
+  max-width: 75%;
 }

@@ -16,16 +16,23 @@ function HomepageHeader() {
       <div className="container">
         <div class="row">
           <div class="col col--6">
-            <h1 className="hero__title">{siteConfig.tagline}</h1>
+            <h1 className={styles.hero}>{siteConfig.tagline}</h1>
             <div className={styles.buttons}>
               <Link
-                className="button button--primary button--lg"
+                className={clsx(
+                  "button button--primary button--lg margin-left--none margin-right--md",
+                  styles.buttonHero,
+                )}
                 to="/postgraphile/next"
               >
                 Documentation
               </Link>
               <Link
-                className="button button--secondary button--lg"
+                className={clsx(
+                  "button button--outline button--lg margin-left--none",
+                  styles.buttonHero,
+                  styles.buttonHeroOutline,
+                )}
                 to="/postgraphile/next"
               >
                 Overview - 5min ⏱
@@ -33,7 +40,10 @@ function HomepageHeader() {
             </div>
           </div>
           <div class="col col--6">
-            <HeroImage title="Coder sat at monitor" className="heroImage" />
+            <HeroImage
+              title="Coder sat at monitor"
+              className={styles.heroImage}
+            />
           </div>
         </div>
       </div>
