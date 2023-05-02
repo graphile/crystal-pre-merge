@@ -14,8 +14,14 @@ function HomepageHeader() {
   return (
     <header className={clsx("hero", styles.heroBanner)}>
       <div className="container">
-        <div class="row">
-          <div class="col col--6">
+        <div className="row">
+          <div className="col col--6">
+            <div className={styles.github}>
+              <img
+                className={styles.githubButton}
+                src="https://img.shields.io/github/stars/graphile/postgraphile?label=Star&style=social"
+              />
+            </div>
             <h1 className={styles.hero}>{siteConfig.tagline}</h1>
             <div className={styles.buttons}>
               <Link

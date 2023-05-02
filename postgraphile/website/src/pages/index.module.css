@@ -29,12 +29,15 @@
   border: 1px solid var(--ifm-color-primary);
 }
 
+.buttonHero:hover {
+  border: 1px solid var(--ifm-color-primary-dark);
+}
+
 .buttonHeroOutline {
   color: var(--ifm-color-primary);
 }
 
 .buttonHeroOutline:hover {
-  border: 1px solid var(--ifm-color-primary-dark);
   color: var(--ifm-color-primary-dark);
 }
 
@@ -46,4 +49,12 @@
 
 .heroImage {
   max-width: 75%;
+}
+
+.github {
+  text-align: left;
+}
+
+.githubButton {
+  width: 8rem;
 }
