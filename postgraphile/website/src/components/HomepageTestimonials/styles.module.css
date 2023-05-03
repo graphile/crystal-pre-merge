@@ -1,13 +1,13 @@
-.features {
+.testimonials {
   display: flex;
   align-items: center;
   padding: 2rem 0;
   width: 100%;
+  background-color: var(--ifm-color-primary-lightest);
   color: var(--ifm-color-primary-darkest);
-  background-color: var(--ifm-hero-background-color);
 }
 
-.featureSvg {
+.testimonialSvg {
   height: 200px;
   width: 200px;
 }
