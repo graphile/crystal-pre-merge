@@ -14,7 +14,7 @@ function HomepageHeader() {
   return (
     <header className={clsx("hero", styles.heroBanner)}>
       <div className="container">
-        <div className="row">
+        <div className={clsx("row", styles.heroRow)}>
           <div className="col col--6">
             <div className={styles.github}>
               <img
@@ -22,7 +22,9 @@ function HomepageHeader() {
                 src="https://img.shields.io/github/stars/graphile/postgraphile?label=Star&style=social"
               />
             </div>
-            <h1 className={styles.hero}>{siteConfig.tagline}</h1>
+            <h1 className={clsx("padding-vert--md", styles.hero)}>
+              {siteConfig.tagline}
+            </h1>
             <div className={styles.buttons}>
               <Link
                 className={clsx(

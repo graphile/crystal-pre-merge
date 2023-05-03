@@ -8,12 +8,17 @@
   text-align: center;
   position: relative;
   overflow: hidden;
+  display: flex;
 }
 
 @media screen and (max-width: 996px) {
   .heroBanner {
     padding: 2rem;
   }
+}
+
+.heroRow {
+  align-items: center;
 }
 
 .buttons {
@@ -27,6 +32,7 @@
   font-size: 0.8rem;
   border-radius: 7px;
   border: 1px solid var(--ifm-color-primary);
+  letter-spacing: 0.1rem;
 }
 
 .buttonHero:hover {
@@ -48,7 +54,7 @@
 }
 
 .heroImage {
-  max-width: 75%;
+  max-width: 70%;
 }
 
 .github {
