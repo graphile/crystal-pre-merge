@@ -106,6 +106,13 @@ const config = {
     ],
   ],
 
+  stylesheets: [
+    {
+      href: "https://fonts.googleapis.com/css2?family=Sarabun",
+      type: "text/css",
+    },
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
