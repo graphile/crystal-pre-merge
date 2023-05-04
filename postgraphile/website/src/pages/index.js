@@ -2,6 +2,7 @@ import Link from "@docusaurus/Link";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import HomepageFeatures from "@site/src/components/HomepageFeatures";
 import HomepageTestimonials from "@site/src/components/HomepageTestimonials";
+import HomepageTools from "@site/src/components/HomepageTools";
 import CalloutSection from "@site/src/components/CalloutSection";
 import SecondarySection from "@site/src/components/SecondarySection";
 import TertiarySection from "@site/src/components/TertiarySection";
@@ -82,6 +83,7 @@ export default function Home() {
           link={`https://github.com/graphile/starter`}
           buttonText={`Learn more`}
         />
+        <HomepageTools />
         <CalloutSection
           title={`Crowd-funded open-source software`}
           body={`We're extremely grateful to our sponsors, for helping to fund ongoing development on PostGraphile, Graphile Engine, Graphile Worker and Graphile Migrate.

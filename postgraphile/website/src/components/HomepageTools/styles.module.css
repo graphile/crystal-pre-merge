@@ -1,0 +1,12 @@
+.tools {
+  display: flex;
+  align-items: center;
+  padding: 2rem 0;
+  width: 100%;
+  color: var(--ifm-color-primary-darkest);
+  background-color: var(--ifm-hero-background-color);
+}
+
+[data-theme="dark"] .tools {
+  color: var(--ifm-color-primary-lightest);
+}
