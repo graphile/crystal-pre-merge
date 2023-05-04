@@ -2,6 +2,7 @@ import Link from "@docusaurus/Link";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import HomepageFeatures from "@site/src/components/HomepageFeatures";
 import HomepageTestimonials from "@site/src/components/HomepageTestimonials";
+import CalloutSection from "@site/src/components/CalloutSection";
 import SecondarySection from "@site/src/components/SecondarySection";
 import TertiarySection from "@site/src/components/TertiarySection";
 import Layout from "@theme/Layout";
@@ -80,6 +81,13 @@ export default function Home() {
           Svg={require("@site/static/img/homepage/starter.svg").default}
           link={`https://github.com/graphile/starter`}
           buttonText={`Learn more`}
+        />
+        <CalloutSection
+          title={`Crowd-funded open-source software`}
+          body={`We're extremely grateful to our sponsors, for helping to fund ongoing development on PostGraphile, Graphile Engine, Graphile Worker and Graphile Migrate.
+          THANK YOU!`}
+          link={`https://graphile.org/sponsor/`}
+          buttonText={`Learn more about sponsors and sponsorship`}
         />
         <TertiarySection
           title={`Development Support`}
