@@ -3,6 +3,7 @@ import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import HomepageFeatures from "@site/src/components/HomepageFeatures";
 import HomepageTestimonials from "@site/src/components/HomepageTestimonials";
 import SecondarySection from "@site/src/components/SecondarySection";
+import TertiarySection from "@site/src/components/TertiarySection";
 import Layout from "@theme/Layout";
 import clsx from "clsx";
 import React from "react";
@@ -77,12 +78,24 @@ export default function Home() {
           tagline={`A quick-start project for full-stack application development in React, Node.js, GraphQL and PostgreSQL`}
           body={`Graphile Starter includes the foundations of a modern web application, with a full user registration system, session management, optimised job queue, pre-configured tooling, tests and much more.`}
           Svg={require("@site/static/img/homepage/starter.svg").default}
+          link={`https://github.com/graphile/starter`}
+          buttonText={`Learn more`}
+        />
+        <TertiarySection
+          title={`Development Support`}
+          tagline={`Priority text support straight from the maintainer`}
+          body={`Give your company access to the knowledge and experience of the Graphile team through your chat server and GitHub/GitLab organisation. Reference your code verbatim and arrange calls for any trickier topics.`}
+          Svg={require("@site/static/img/homepage/support.svg").default}
+          link={`https://www.graphile.org/support/`}
+          buttonText={`Learn more`}
         />
         <SecondarySection
-          title={`Graphile Engine`}
-          tagline={`Build high-performance easily-extensible GraphQL schemas by combining plugins`}
-          body={`Graphile Engine is the database-independent heart of PostGraphile — it's an extremely powerful way to build extensible automatic GraphQL APIs over any data source.`}
+          title={`Grafast`}
+          tagline={`Advanced planning and execution engine for GraphQL`}
+          body={`Grafast is an alternative execution engine for GraphQL; its plan-based approach helps developers avoid common pitfalls and achieve better backend efficiency, leading to increased scalability and incredible performance your customers will love.`}
           Svg={require("@site/static/img/homepage/engine.svg").default}
+          link={`https://grafast.org/`}
+          buttonText={`Learn more`}
         />
       </main>
     </Layout>

@@ -4,7 +4,7 @@ import Link from "@docusaurus/Link";
 
 import styles from "./styles.module.css";
 
-export default function SecondaryContent({
+export default function TertiaryContent({
   title,
   tagline,
   body,
@@ -13,12 +13,9 @@ export default function SecondaryContent({
   buttonText,
 }) {
   return (
-    <section className={styles.secondarySection}>
+    <section className={styles.tertiarySection}>
       <div className="container">
-        <div className={clsx("row", styles.secondaryRow)}>
-          <div className="col col--6">
-            <Svg className={styles.secondarySvg} role="img" />
-          </div>
+        <div className={clsx("row", styles.tertiaryRow)}>
           <div className="col col--6">
             <div>
               <h2>{title}</h2>
@@ -34,6 +31,9 @@ export default function SecondaryContent({
                 {buttonText}
               </Link>
             </div>
+          </div>
+          <div className="col col--6">
+            <Svg className={styles.tertiarySvg} role="img" />
           </div>
         </div>
       </div>
