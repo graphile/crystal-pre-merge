@@ -78,6 +78,12 @@ export default function Home() {
           body={`Graphile Starter includes the foundations of a modern web application, with a full user registration system, session management, optimised job queue, pre-configured tooling, tests and much more.`}
           Svg={require("@site/static/img/homepage/starter.svg").default}
         />
+        <SecondarySection
+          title={`Graphile Engine`}
+          tagline={`Build high-performance easily-extensible GraphQL schemas by combining plugins`}
+          body={`Graphile Engine is the database-independent heart of PostGraphile — it's an extremely powerful way to build extensible automatic GraphQL APIs over any data source.`}
+          Svg={require("@site/static/img/homepage/engine.svg").default}
+        />
       </main>
     </Layout>
   );
