@@ -7,6 +7,11 @@
   color: var(--ifm-color-primary-darkest);
 }
 
+[data-theme="dark"] .testimonials {
+  background-color: var(--ifm-color-primary-darkest);
+  color: var(--ifm-color-primary-lightest);
+}
+
 .testimonialSvg {
   height: 200px;
   width: 200px;

@@ -53,6 +53,10 @@
   text-align: left;
 }
 
+[data-theme="dark"] .hero {
+  color: var(--ifm-color-primary-lightest);
+}
+
 .heroImage {
   max-width: 70%;
 }
