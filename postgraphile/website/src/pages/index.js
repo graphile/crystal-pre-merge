@@ -2,6 +2,7 @@ import Link from "@docusaurus/Link";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import HomepageFeatures from "@site/src/components/HomepageFeatures";
 import HomepageTestimonials from "@site/src/components/HomepageTestimonials";
+import SecondarySection from "@site/src/components/SecondarySection";
 import Layout from "@theme/Layout";
 import clsx from "clsx";
 import React from "react";
@@ -71,18 +72,12 @@ export default function Home() {
       <main>
         <HomepageTestimonials />
         <HomepageFeatures />
-        <div className={styles.secondarySection}>
-          <div className="container">
-            <div className="row">
-              <div className="col col--6">
-                <div>Item 1</div>
-              </div>
-              <div className="col col--6">
-                <div>Item 2</div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <SecondarySection
+          title={`Graphile Starter`}
+          tagline={`A quick-start project for full-stack application development in React, Node.js, GraphQL and PostgreSQL`}
+          body={`Graphile Starter includes the foundations of a modern web application, with a full user registration system, session management, optimised job queue, pre-configured tooling, tests and much more.`}
+          Svg={require("@site/static/img/homepage/starter.svg").default}
+        />
       </main>
     </Layout>
   );
