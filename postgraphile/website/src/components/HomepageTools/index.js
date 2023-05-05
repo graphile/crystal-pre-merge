@@ -39,25 +39,27 @@ const ToolList = [
 
 function Tool({ title, tagline, link, buttonText, description, stars }) {
   return (
-    <div className={clsx("col col--4 margin-horiz--md ", styles.tool)}>
-      <div className="padding-horiz--md padding--lg">
+    <div className={clsx("col col--4", styles.tool)}>
+      <div className="padding-horiz--md padding-top--lg">
         <h2>{title}</h2>
         <h3>{tagline}</h3>
         <p>{description}</p>
-        <div className={styles.buttons}>
-          <Link
-            className={clsx(
-              "button button--primary button--lg margin-left--none margin-right--md",
-              styles.button,
-            )}
-            to={link}
-          >
-            {buttonText}
-          </Link>
-          <Link to={link}>
-            <img className={styles.githubButton} src={stars} />
-          </Link>
-        </div>
+      </div>
+      <div
+        className={clsx("padding-horiz--md padding-bottom--lg", styles.buttons)}
+      >
+        <Link
+          className={clsx(
+            "button button--primary button--lg margin-left--none margin-right--md",
+            styles.button,
+          )}
+          to={link}
+        >
+          {buttonText}
+        </Link>
+        <Link to={link}>
+          <img className={styles.githubButton} src={stars} />
+        </Link>
       </div>
     </div>
   );
