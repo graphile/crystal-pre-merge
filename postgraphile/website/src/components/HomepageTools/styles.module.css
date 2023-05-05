@@ -28,3 +28,13 @@
   letter-spacing: 0.1rem;
   text-transform: uppercase;
 }
+
+.githubButton {
+  width: 10rem;
+}
+
+.buttons {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}

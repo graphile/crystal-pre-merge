@@ -29,6 +29,7 @@
   font-size: 0.8rem;
   border-radius: 7px;
   border: 1px solid var(--ifm-color-primary);
+  color: var(--ifm-color-primary);
   letter-spacing: 0.1rem;
   text-transform: uppercase;
 }

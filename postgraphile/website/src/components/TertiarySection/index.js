@@ -23,7 +23,7 @@ export default function TertiaryContent({
               <p>{body}</p>
               <Link
                 className={clsx(
-                  "button button--primary button--lg margin-left--none margin-right--md",
+                  "button button--outline button--lg margin-left--none margin-right--md",
                   styles.button,
                 )}
                 to={link}

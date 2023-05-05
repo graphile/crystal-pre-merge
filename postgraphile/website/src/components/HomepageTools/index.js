@@ -10,6 +10,8 @@ const ToolList = [
     tagline: "High performance Node.js/PostgreSQL job queue",
     link: "https://github.com/graphile/worker",
     buttonText: "Documentation",
+    stars:
+      "https://img.shields.io/github/stars/graphile/worker?label=star&style=social",
     description: (
       <>
         Run jobs (e.g. sending emails, generating PDFs, …) "in the background"
@@ -24,6 +26,8 @@ const ToolList = [
       "Opinionated SQL-powered productive roll-forward migration tool for PostgreSQL",
     link: "https://github.com/graphile/migrate",
     buttonText: "Documentation",
+    stars:
+      "https://img.shields.io/github/stars/graphile/migrate?label=star&style=social",
     description: (
       <>
         Experimental, being developed in the open. Focuses on fast iteration
@@ -33,22 +37,27 @@ const ToolList = [
   },
 ];
 
-function Tool({ title, tagline, link, buttonText, description }) {
+function Tool({ title, tagline, link, buttonText, description, stars }) {
   return (
     <div className={clsx("col col--4 margin-horiz--md ", styles.tool)}>
       <div className="padding-horiz--md padding--lg">
         <h2>{title}</h2>
         <h3>{tagline}</h3>
         <p>{description}</p>
-        <Link
-          className={clsx(
-            "button button--primary button--lg margin-left--none margin-right--md",
-            styles.button,
-          )}
-          to={link}
-        >
-          {buttonText}
-        </Link>
+        <div className={styles.buttons}>
+          <Link
+            className={clsx(
+              "button button--primary button--lg margin-left--none margin-right--md",
+              styles.button,
+            )}
+            to={link}
+          >
+            {buttonText}
+          </Link>
+          <Link to={link}>
+            <img className={styles.githubButton} src={stars} />
+          </Link>
+        </div>
       </div>
     </div>
   );

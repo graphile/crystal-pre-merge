@@ -22,10 +22,12 @@ function HomepageHeader() {
         <div className={clsx("row", styles.heroRow)}>
           <div className="col col--6">
             <div className={styles.github}>
-              <img
-                className={styles.githubButton}
-                src="https://img.shields.io/github/stars/graphile/postgraphile?label=Star&style=social"
-              />
+              <Link to="https://github.com/graphile/postgraphile">
+                <img
+                  className={styles.githubButton}
+                  src="https://img.shields.io/github/stars/graphile/postgraphile?label=Star&style=social"
+                />
+              </Link>
             </div>
             <h1 className={clsx("padding-vert--md", styles.hero)}>
               {siteConfig.tagline}
