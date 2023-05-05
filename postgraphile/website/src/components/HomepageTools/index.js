@@ -8,8 +8,8 @@ const ToolList = [
   {
     title: "Graphile Worker",
     tagline: "High performance Node.js/PostgreSQL job queue",
-    link: "https://graphile.org/",
-    buttonText: "button",
+    link: "https://github.com/graphile/worker",
+    buttonText: "Documentation",
     description: (
       <>
         Run jobs (e.g. sending emails, generating PDFs, …) "in the background"
@@ -22,8 +22,8 @@ const ToolList = [
     title: "Graphile Migrate",
     tagline:
       "Opinionated SQL-powered productive roll-forward migration tool for PostgreSQL",
-    link: "https://graphile.org/",
-    buttonText: "button",
+    link: "https://github.com/graphile/migrate",
+    buttonText: "Documentation",
     description: (
       <>
         Experimental, being developed in the open. Focuses on fast iteration
@@ -35,8 +35,8 @@ const ToolList = [
 
 function Tool({ title, tagline, link, buttonText, description }) {
   return (
-    <div className={clsx("col col--4")}>
-      <div className="text--center padding-horiz--md">
+    <div className={clsx("col col--4 margin-horiz--md ", styles.tool)}>
+      <div className="padding-horiz--md padding--lg">
         <h2>{title}</h2>
         <h3>{tagline}</h3>
         <p>{description}</p>
@@ -58,7 +58,7 @@ export default function HomepageTools() {
   return (
     <section className={styles.tools}>
       <div className="container">
-        <div className="row">
+        <div className={clsx("row", styles.toolRow)}>
           {ToolList.map((props, idx) => (
             <Tool key={idx} {...props} />
           ))}

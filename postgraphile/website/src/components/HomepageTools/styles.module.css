@@ -1,12 +1,30 @@
 .tools {
   display: flex;
-  align-items: center;
   padding: 2rem 0;
   width: 100%;
   color: var(--ifm-color-primary-darkest);
-  background-color: var(--ifm-hero-background-color);
 }
 
 [data-theme="dark"] .tools {
   color: var(--ifm-color-primary-lightest);
+}
+
+.tools h3 {
+  font-weight: normal;
+}
+
+.toolRow {
+  justify-content: center;
+}
+
+.tool {
+  border: 1px solid var(--ifm-color-primary-lighter);
+}
+
+.button {
+  font-size: 0.8rem;
+  border-radius: 7px;
+  border: 1px solid var(--ifm-color-primary);
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
 }
