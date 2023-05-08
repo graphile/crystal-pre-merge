@@ -102,10 +102,10 @@ export default function Home() {
           buttonText={`Learn more`}
         />
         <SecondarySection
-          title={`Grafast`}
-          tagline={`Advanced planning and execution engine for GraphQL`}
-          body={`Grafast is an alternative execution engine for GraphQL; its plan-based approach helps developers avoid common pitfalls and achieve better backend efficiency, leading to increased scalability and incredible performance your customers will love.`}
-          Svg={require("@site/static/img/homepage/engine.svg").default}
+          title={<>Advanced planning and execution engine for GraphQL</>}
+          tagline={`Grafast's plan-based approach helps developers avoid common pitfalls and achieve better backend efficiency, leading to increased scalability and incredible performance your customers will love.`}
+          body={``}
+          Svg={require("@site/static/img/homepage/grafast.svg").default}
           link={`https://grafast.org/`}
           buttonText={`Learn more`}
         />

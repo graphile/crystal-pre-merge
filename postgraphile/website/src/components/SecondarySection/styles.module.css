@@ -33,3 +33,7 @@
   letter-spacing: 0.1rem;
   text-transform: uppercase;
 }
+
+svg {
+  max-width: 100%;
+}
