@@ -1,5 +1,7 @@
 .testimonials {
   composes: contents from "../../css/common.module.css";
+  /*background-color: var(--ifm-color-primary-lightest);*/
+  background-color: var(--ifm-hero-background-color);
 }
 
 [data-theme="dark"] .testimonials {

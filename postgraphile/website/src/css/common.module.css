@@ -1,10 +1,9 @@
 .contents {
   display: flex;
-  align-items: center;
+  align-items: space-between;
   padding: 2rem 0;
   width: 100%;
   color: var(--ifm-color-primary-darkest);
-  background-color: var(--ifm-hero-background-color);
 }
 
 [data-theme="dark"] .contents {
@@ -12,13 +11,12 @@
 }
 
 .content {
-  max-width: 22rem;
+  max-width: 28rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
 .row {
-  justify-content: center;
-  gap: 2rem;
+  justify-content: space-between;
 }

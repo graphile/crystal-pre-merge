@@ -75,8 +75,9 @@ export default function Home() {
     >
       <HomepageHeader />
       <main>
-        <HomepageTestimonials />
         <HomepageFeatures />
+        <HomepageTestimonials />
+
         <SecondarySection
           title={`Graphile Starter`}
           tagline={`A quick-start project for full-stack application development in React, Node.js, GraphQL and PostgreSQL`}

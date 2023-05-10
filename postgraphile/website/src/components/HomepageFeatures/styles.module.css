@@ -1,5 +1,7 @@
 .features {
   composes: contents from "../../css/common.module.css";
+  /*background-color: var(--ifm-hero-background-color);*/
+  background-color: var(--ifm-color-primary-lightest);
 }
 
 .row {
