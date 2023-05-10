@@ -13,8 +13,8 @@
   text-align: center;
 }
 
-.tools h3 {
-  font-weight: normal;
+.tagline {
+  composes: tagline from "../../css/common.module.css";
 }
 
 .toolRow {

@@ -22,7 +22,7 @@ export default function SecondaryContent({
           <div className="col col--6">
             <div>
               <h2 className={styles.header}>{title}</h2>
-              <h3>{tagline}</h3>
+              <h3 className={styles.tagline}>{tagline}</h3>
               <p>{body}</p>
               <Link
                 className={clsx(

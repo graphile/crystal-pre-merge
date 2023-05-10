@@ -17,8 +17,8 @@
   composes: header from "../../css/common.module.css";
 }
 
-.tertiarySection h3 {
-  font-weight: normal;
+.tagline {
+  composes: tagline from "../../css/common.module.css";
 }
 
 .button {

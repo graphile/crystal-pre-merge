@@ -42,7 +42,7 @@ function Tool({ title, tagline, link, buttonText, description, stars }) {
     <div className={clsx("col col--4", styles.tool)}>
       <div className="padding-horiz--md padding-top--lg">
         <h2>{title}</h2>
-        <h3>{tagline}</h3>
+        <h3 className={styles.tagline}>{tagline}</h3>
         <p>{description}</p>
       </div>
       <div
