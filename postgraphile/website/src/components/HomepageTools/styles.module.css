@@ -1,12 +1,16 @@
 .tools {
   display: flex;
-  padding: 2rem 0;
   width: 100%;
   color: var(--ifm-color-primary-darkest);
 }
 
 [data-theme="dark"] .tools {
   color: var(--ifm-color-primary-lightest);
+}
+
+.header {
+  composes: header from "../../css/common.module.css";
+  text-align: center;
 }
 
 .tools h3 {

@@ -67,8 +67,11 @@ function Tool({ title, tagline, link, buttonText, description, stars }) {
 
 export default function HomepageTools() {
   return (
-    <section className={styles.tools}>
+    <section className={clsx("padding-vert--lg", styles.tools)}>
       <div className="container">
+        <h2 className={clsx("padding-bottom--lg", styles.header)}>
+          Database tools
+        </h2>
         <div className={clsx("row", styles.toolRow)}>
           {ToolList.map((props, idx) => (
             <Tool key={idx} {...props} />

@@ -25,9 +25,8 @@
   color: var(--ifm-background-color);
 }
 
-.calloutSection h2 {
-  font-size: 2.5rem;
-  font-weight: normal;
+.header {
+  composes: header from "../../css/common.module.css";
 }
 
 .calloutSection h3 {

@@ -21,7 +21,7 @@ export default function SecondaryContent({
           </div>
           <div className="col col--6">
             <div>
-              <h2>{title}</h2>
+              <h2 className={styles.header}>{title}</h2>
               <h3>{tagline}</h3>
               <p>{body}</p>
               <Link

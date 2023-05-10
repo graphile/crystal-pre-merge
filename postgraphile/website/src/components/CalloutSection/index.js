@@ -16,7 +16,7 @@ export default function CalloutContent({
     <section>
       <div className={clsx("container margin-vert--lg", styles.calloutSection)}>
         <div className={clsx("col col--6 padding-vert--md", styles.inner)}>
-          <h2>{title}</h2>
+          <h2 className={styles.header}>{title}</h2>
           <p>{body}</p>
           <Link
             className={clsx("button button--primary button--lg", styles.button)}
