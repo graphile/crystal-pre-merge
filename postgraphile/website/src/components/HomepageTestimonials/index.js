@@ -1,13 +1,29 @@
 import clsx from "clsx";
 import React from "react";
+import Link from "@docusaurus/Link";
 
 import styles from "./styles.module.css";
 
 const TestimonialList = [
   {
+    author: "Max D.",
+    title: "Software Consultant, London",
+    src: "https://desiatov.com/why-graphql/",
+    image: require("@site/static/img/testimonials/maxd.jpg").default,
+    quote: (
+      <>
+        Recently I launched a few mobile and web apps using GraphQL, Great
+        stuff, not least thanks to wonderful PostGraphile and Apollo. At this
+        point, it&apos;s quite hard for me to come back and enjoy working with
+        REST.
+      </>
+    ),
+  },
+  {
     author: "Chad F.",
-    title: "senior technical lead",
-    Svg: require("@site/static/img/undraw_docusaurus_mountain.svg").default,
+    title: "Senior Technical Lead, Clevertech",
+    image: require("@site/static/img/testimonials/chadf.png").default,
+    src: "https://desiatov.com/why-graphql/",
     quote: (
       <>
         Thanks for making GraphQL something I can use on my project in a robust
@@ -18,8 +34,9 @@ const TestimonialList = [
   },
   {
     author: "Sam L.",
-    title: "full stack developer",
-    Svg: require("@site/static/img/undraw_docusaurus_tree.svg").default,
+    title: "Full-stack Developer, Boston",
+    image: require("@site/static/img/testimonials/saml.png").default,
+    src: "",
     quote: (
       <>
         This project, Benjie&apos;s handling of it, the docs, support, and
@@ -28,30 +45,24 @@ const TestimonialList = [
       </>
     ),
   },
-  {
-    author: "Max D.",
-    title: "software consultant",
-    Svg: require("@site/static/img/undraw_docusaurus_react.svg").default,
-    quote: (
-      <>
-        Recently I launched a few mobile and web apps using GraphQL, Great
-        stuff, not least thanks to wonderful PostGraphile and Apollo. At this
-        point, it&apos;s quite hard for me to come back and enjoy working with
-        REST.
-      </>
-    ),
-  },
 ];
 
-function Testimonial({ Svg, author, quote, title }) {
+function Testimonial({ author, quote, title, image }) {
   return (
-    <div className={clsx("col col--4")}>
-      <div className="text--center">
-        <Svg className={styles.testimonialSvg} role="img" />
-      </div>
-      <div className="text--center padding-horiz--md">
-        <h3>{author}</h3>
+    <div className={clsx("col col--4", styles.testimonial)}>
+      <div className="quote">
         <p>{quote}</p>
+      </div>
+      <div className={styles.credit}>
+        <div className={styles.creditAvatar}>
+          <img src={image} />
+        </div>
+        <div className={styles.creditAuthorDetails}>
+          <div className={styles.creditAuthor}>
+            <strong>{author}</strong>
+          </div>
+          <div className={styles.creditTitle}>{title}</div>
+        </div>
       </div>
     </div>
   );
@@ -61,7 +72,7 @@ export default function HomepageTestimonials() {
   return (
     <section className={styles.testimonials}>
       <div className="container">
-        <div className="row">
+        <div className={clsx("row", styles.row)}>
           {TestimonialList.map((props, idx) => (
             <Testimonial key={idx} {...props} />
           ))}
