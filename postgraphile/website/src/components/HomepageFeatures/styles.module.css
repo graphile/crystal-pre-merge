@@ -1,14 +1,13 @@
 .features {
-  display: flex;
-  align-items: center;
-  padding: 2rem 0;
-  width: 100%;
-  color: var(--ifm-color-primary-darkest);
-  background-color: var(--ifm-hero-background-color);
+  composes: contents from "../../css/common.module.css";
 }
 
-[data-theme="dark"] .features {
-  color: var(--ifm-color-primary-lightest);
+.row {
+  composes: row from "../../css/common.module.css";
+}
+
+.feature {
+  composes: content from "../../css/common.module.css";
 }
 
 .featureSvg {

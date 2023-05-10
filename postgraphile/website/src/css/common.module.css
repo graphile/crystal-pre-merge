@@ -1,0 +1,24 @@
+.contents {
+  display: flex;
+  align-items: center;
+  padding: 2rem 0;
+  width: 100%;
+  color: var(--ifm-color-primary-darkest);
+  background-color: var(--ifm-hero-background-color);
+}
+
+[data-theme="dark"] .contents {
+  color: var(--ifm-color-primary-lightest);
+}
+
+.content {
+  max-width: 22rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.row {
+  justify-content: center;
+  gap: 2rem;
+}

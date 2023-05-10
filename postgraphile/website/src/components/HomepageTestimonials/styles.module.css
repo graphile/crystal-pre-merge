@@ -1,26 +1,17 @@
 .testimonials {
-  display: flex;
-  padding: 2rem 0;
-  width: 100%;
-  background-color: var(--ifm-color-primary-lightest);
-  color: var(--ifm-color-primary-darkest);
+  composes: contents from "../../css/common.module.css";
 }
 
 [data-theme="dark"] .testimonials {
   background-color: var(--ifm-color-primary-darkest);
-  color: var(--ifm-color-primary-lightest);
 }
 
 .row {
-  justify-content: center;
-  gap: 2rem;
+  composes: row from "../../css/common.module.css";
 }
 
 .testimonial {
-  max-width: 22rem;
-  display: flex;
-  flex-direction: column;
-  align-items: space-between;
+  composes: content from "../../css/common.module.css";
 }
 
 .credit {
