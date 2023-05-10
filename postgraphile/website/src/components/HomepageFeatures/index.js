@@ -6,7 +6,7 @@ import styles from "./styles.module.css";
 const FeatureList = [
   {
     title: "Get started in seconds",
-    Svg: require("@site/static/img/undraw_docusaurus_mountain.svg").default,
+    Svg: require("@site/static/img/homepage/clock.svg").default,
     description: (
       <>
         <code>npx postgraphile -c postgres://...</code> and you&apos;re running
@@ -16,7 +16,7 @@ const FeatureList = [
   },
   {
     title: "Craft your perfect API",
-    Svg: require("@site/static/img/undraw_docusaurus_tree.svg").default,
+    Svg: require("@site/static/img/homepage/code.svg").default,
     description: (
       <>
         Don&apos;t just take our defaults, spend a few minutes honing your API
@@ -26,7 +26,7 @@ const FeatureList = [
   },
   {
     title: "Versatile",
-    Svg: require("@site/static/img/undraw_docusaurus_react.svg").default,
+    Svg: require("@site/static/img/homepage/fun-arrow.svg").default,
     description: (
       <>
         Whether you&apos;re building the backend API for your SaaS, build
@@ -37,7 +37,7 @@ const FeatureList = [
   },
   {
     title: "Versatile Also",
-    Svg: require("@site/static/img/undraw_docusaurus_tree.svg").default,
+    Svg: require("@site/static/img/homepage/rocket.svg").default,
     description: (
       <>
         Whether you&apos;re building the backend API for your SaaS, build
@@ -51,12 +51,12 @@ const FeatureList = [
 function Feature({ Svg, title, description }) {
   return (
     <div className={clsx("col col--6", styles.feature)}>
-      <div className="text--center">
+      <div className="">
         <Svg className={styles.featureSvg} role="img" />
       </div>
-      <div className="">
-        <h3>{title}</h3>
-        <p>{description}</p>
+      <div className={styles.featureDetails}>
+        <h2 className={styles.featureTitle}>{title}</h2>
+        <h3 className={styles.featureInfo}>{description}</h3>
       </div>
     </div>
   );

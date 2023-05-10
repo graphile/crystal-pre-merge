@@ -10,9 +10,23 @@
 
 .feature {
   composes: content from "../../css/common.module.css";
+  flex-direction: row;
 }
 
 .featureSvg {
-  height: 200px;
-  width: 200px;
+  height: 10rem;
+  width: 10rem;
+}
+
+.featureDetails {
+  display: flex;
+  flex-direction: column;
+  padding-left: 2rem;
+}
+
+.featureTitle {
+}
+
+.featureInfo {
+  composes: tagline from "../../css/common.module.css";
 }
