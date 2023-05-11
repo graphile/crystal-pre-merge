@@ -36,13 +36,14 @@ const FeatureList = [
     ),
   },
   {
-    title: "Versatile Also",
-    Svg: require("@site/static/img/homepage/rocket.svg").default,
+    title: "Powered by Grafast",
+    Svg: require("@site/static/img/homepage/heart.svg").default,
     description: (
       <>
-        Whether you&apos;re building the backend API for your SaaS, build
-        internal tooling for your business, or anything else, PostGraphile has
-        your back.
+        PostGraphile Version 5 is built upon a new, powerful and pleasant
+        planning and execution engine which brings with it a new, holistic
+        approach and simpler abstractions, better performance and code which is
+        easier to read and maintain.
       </>
     ),
   },
@@ -50,8 +51,8 @@ const FeatureList = [
 
 function Feature({ Svg, title, description }) {
   return (
-    <div className={clsx("col col--6", styles.feature)}>
-      <div className="">
+    <div className={clsx("col col--6 padding-vert--md", styles.feature)}>
+      <div className={styles.svgContainer}>
         <Svg className={styles.featureSvg} role="img" />
       </div>
       <div className={styles.featureDetails}>
