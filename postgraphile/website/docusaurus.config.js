@@ -167,14 +167,19 @@ const config = {
         ],
       },
       footer: {
-        style: "dark",
+        logo: {
+          alt: "PostGraphile Logo",
+          src: "img/logo.svg",
+          width: 64,
+          height: 64,
+        },
         links: [
           {
             title: "Docs",
             items: [
               {
                 label: "PostGraphile",
-                to: "https://grafast.org",
+                to: "https://postgraphile.org",
               },
               {
                 label: "Grafast",
@@ -201,6 +206,10 @@ const config = {
                 label: "Twitter",
                 href: "https://twitter.com/GraphileHQ",
               },
+              {
+                label: "Mastodon",
+                href: "https://fosstodon.org/@graphile",
+              },
             ],
           },
           {
@@ -209,6 +218,10 @@ const config = {
               {
                 label: "GitHub",
                 href: `https://github.com/${organizationName}/${projectName}`,
+              },
+              {
+                label: "Sponsor",
+                href: `https://graphile.org/sponsor/`,
               },
             ],
           },
