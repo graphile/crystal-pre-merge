@@ -54,7 +54,7 @@ function HomepageHeader() {
               </Link>
             </div>
           </div>
-          <div class="col col--6">
+          <div className="col col--6">
             <HeroImage
               title="Coder sat at monitor"
               className={styles.heroImage}

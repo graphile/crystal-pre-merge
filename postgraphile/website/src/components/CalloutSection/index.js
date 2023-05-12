@@ -4,14 +4,7 @@ import Link from "@docusaurus/Link";
 
 import styles from "./styles.module.css";
 
-export default function CalloutContent({
-  title,
-  tagline,
-  body,
-  Svg,
-  link,
-  buttonText,
-}) {
+export default function CalloutContent({ title, body, link, buttonText }) {
   return (
     <section>
       <div className={clsx("container margin-vert--lg", styles.calloutSection)}>

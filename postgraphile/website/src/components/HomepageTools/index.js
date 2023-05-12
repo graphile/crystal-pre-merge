@@ -14,9 +14,10 @@ const ToolList = [
       "https://img.shields.io/github/stars/graphile/worker?label=star&style=social",
     description: (
       <>
-        Run jobs (e.g. sending emails, generating PDFs, …) "in the background"
-        so that your HTTP response code is not held up. Starts jobs almost
-        instantly (2ms latency). Used with any PostgreSQL-backed application.
+        Run jobs (e.g. sending emails, generating PDFs, …) &quot;in the
+        background&quot; so that your HTTP response code is not held up. Starts
+        jobs almost instantly (2ms latency). Used with any PostgreSQL-backed
+        application.
       </>
     ),
   },
