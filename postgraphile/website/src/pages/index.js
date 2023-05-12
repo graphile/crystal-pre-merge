@@ -12,7 +12,7 @@ import React from "react";
 
 import HeroImage from "@site/static/img/homepage/coder.svg";
 
-import styles from "./index.module.css";
+import styles from "@site/src/pages/index.module.css";
 
 function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext();

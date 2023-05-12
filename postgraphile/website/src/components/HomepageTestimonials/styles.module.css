@@ -9,11 +9,11 @@
 }
 
 .row {
-  composes: row from "../../css/common.module.css";
+  composes: row from "@site/src/css/common.module.css";
 }
 
 .testimonial {
-  composes: content from "../../css/common.module.css";
+  composes: content from "@site/src/css/common.module.css";
   max-width: 28rem;
 }
 

@@ -2,7 +2,7 @@ import clsx from "clsx";
 import React from "react";
 import Link from "@docusaurus/Link";
 
-import styles from "./styles.module.css";
+import styles from "@site/src/components/CalloutSection/styles.module.css";
 
 export default function CalloutContent({ title, body, link, buttonText }) {
   return (

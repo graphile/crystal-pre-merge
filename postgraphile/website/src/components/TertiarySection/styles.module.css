@@ -14,11 +14,11 @@
 }
 
 .header {
-  composes: header from "../../css/common.module.css";
+  composes: header from "@site/src/css/common.module.css";
 }
 
 .tagline {
-  composes: tagline from "../../css/common.module.css";
+  composes: tagline from "@site/src/css/common.module.css";
 }
 
 .button {

@@ -5,11 +5,11 @@
 }
 
 .row {
-  composes: row from "../../css/common.module.css";
+  composes: row from "@site/src/css/common.module.css";
 }
 
 .feature {
-  composes: content from "../../css/common.module.css";
+  composes: content from "@site/src/css/common.module.css";
   flex-direction: row;
 }
 
@@ -35,5 +35,5 @@
 }
 
 .featureInfo {
-  composes: tagline from "../../css/common.module.css";
+  composes: tagline from "@site/src/css/common.module.css";
 }
