@@ -1,8 +1,7 @@
+import Link from "@docusaurus/Link";
+import styles from "@site/src/components/HomepageTools/styles.module.css";
 import clsx from "clsx";
 import React from "react";
-import Link from "@docusaurus/Link";
-
-import styles from "@site/src/components/HomepageTools/styles.module.css";
 
 const ToolList = [
   {

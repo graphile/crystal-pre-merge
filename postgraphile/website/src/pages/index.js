@@ -1,18 +1,16 @@
 import Link from "@docusaurus/Link";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
+import CalloutSection from "@site/src/components/CalloutSection";
 import HomepageFeatures from "@site/src/components/HomepageFeatures";
 import HomepageTestimonials from "@site/src/components/HomepageTestimonials";
 import HomepageTools from "@site/src/components/HomepageTools";
-import CalloutSection from "@site/src/components/CalloutSection";
 import SecondarySection from "@site/src/components/SecondarySection";
 import TertiarySection from "@site/src/components/TertiarySection";
+import styles from "@site/src/pages/index.module.css";
+import HeroImage from "@site/static/img/homepage/coder.svg";
 import Layout from "@theme/Layout";
 import clsx from "clsx";
 import React from "react";
-
-import HeroImage from "@site/static/img/homepage/coder.svg";
-
-import styles from "@site/src/pages/index.module.css";
 
 function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext();
