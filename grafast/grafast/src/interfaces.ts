@@ -336,8 +336,7 @@ type PathTuple<
       ]
   : never;
 
-// TODO: rename
-export type FieldArgs<
+export type FieldArgsUtils<
   TInput extends Record<string, any> = Record<string, any>,
 > = {
   /** Gets the value, evaluating the `inputPlan` at each field if appropriate */
@@ -349,23 +348,13 @@ export type FieldArgs<
     $target: TargetStepOrCallback,
     path?: keyof TInput | [] | PathTuple<TInput>,
   ): void;
-} & {
-  /**
-   * EXPERIMENTAL!
-   *
-   * @experimental
-   */
-  $: FieldArgsSteps<TInput>;
-} & Record<
-    // Shortcuts to .$.$foo
-    `$${string & keyof TInput}`,
-    ExecutableStep
-  > &
-  Record<
-    // Shortcuts to .$.$$foo
-    `$$${string & keyof TInput}`,
-    InputStep
-  >;
+};
+// TODO: rename
+export type FieldArgs<
+  TInput extends Record<string, any> = Record<string, any>,
+> = {
+  $: FieldArgsUtils<TInput>;
+} & FieldArgsSteps<TInput>;
 
 // Record<`${string & keyof TObj}`, FieldArgs<TObj[TKey]>> &
 type NestedFieldArgsSteps<
@@ -393,9 +382,45 @@ type NestedFieldArgsSteps<
       >
   : never;
 
+type AToZ =
+  | "a"
+  | "b"
+  | "c"
+  | "d"
+  | "e"
+  | "f"
+  | "g"
+  | "h"
+  | "i"
+  | "j"
+  | "k"
+  | "l"
+  | "m"
+  | "n"
+  | "o"
+  | "p"
+  | "q"
+  | "r"
+  | "s"
+  | "t"
+  | "u"
+  | "v"
+  | "w"
+  | "x"
+  | "y"
+  | "z";
+/** Please forgive me. */
+type GraphQLLetter = AToZ | Uppercase<AToZ> | "_";
 type FieldArgsSteps<TObj extends Record<string, any>> =
   "$IS_STRING_OR_ANY$" extends keyof TObj
-    ? Record<string, any>
+    ? Record<
+        `${GraphQLLetter}${string}`,
+        Record<`${GraphQLLetter}${string}`, unknown> &
+          Record<`$${string}`, ExecutableStep> &
+          Record<`$$${string}`, InputStep>
+      > &
+        Record<`$${string}`, ExecutableStep> &
+        Record<`$$${string}`, InputStep>
     : NestedFieldArgsSteps<TObj> &
         Record<`$${string & keyof TObj}`, ExecutableStep> &
         Record<`$$${string & keyof TObj}`, InputStep>;

@@ -123,8 +123,8 @@ const preset: GraphileConfig.Preset = {
         },
         Subscription: {
           // Test via SQL: `NOTIFY test, '{"a":40}';`
-          sub(_$root, args) {
-            const $topic = args.get("topic");
+          sub(_$root, fieldArgs) {
+            const $topic = fieldArgs.$.get("topic");
             const $pgSubscriber = context().get("pgSubscriber");
             return listen($pgSubscriber, $topic, ($payload) =>
               object({ sub: jsonParse($payload).get("a" as never) }),
