@@ -177,7 +177,7 @@ export const PgConnectionArgOrderByPlugin: GraphileConfig.Plugin = {
                         val,
                         info: { schema: GraphQLSchema },
                       ) {
-                        const $value = val.$.getRaw();
+                        const $value = val.getRaw();
                         const $select = $connection.getSubplan();
                         applyOrderToPlan(
                           $select,

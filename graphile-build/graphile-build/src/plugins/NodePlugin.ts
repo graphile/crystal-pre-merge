@@ -200,7 +200,7 @@ export const NodePlugin: GraphileConfig.Plugin = {
                       return node(
                         nodeIdCodecs,
                         nodeIdHandlerByTypeName,
-                        args.$.get(nodeIdFieldName),
+                        args.get(nodeIdFieldName),
                       );
                     },
                   [

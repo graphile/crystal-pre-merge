@@ -2175,7 +2175,7 @@ export function makeExampleSchema(
         (PgSelectSingleStep, TYPES, getClassStep, sql) =>
           function plan($parent: ExecutableStep, $field: TFieldStep, val) {
             const $messages = getClassStep($field);
-            const $value = val.$.getRaw() as
+            const $value = val.getRaw() as
               | __InputStaticLeafStep
               | __TrackedValueStep;
             if ($value.evalIs("YES")) {
@@ -2217,7 +2217,7 @@ export function makeExampleSchema(
         applyPlan: EXPORTABLE(
           (TYPES, sql) =>
             function plan($condition: PgConditionStep<any>, val) {
-              const $value = val.$.getRaw();
+              const $value = val.getRaw();
               if ($value.evalIs(null)) {
                 $condition.where(sql`${$condition.alias}.featured is null`);
               } else {
@@ -2246,7 +2246,7 @@ export function makeExampleSchema(
         applyPlan: EXPORTABLE(
           (TYPES, sql) =>
             function plan($parent, val) {
-              const $value = val.$.getRaw();
+              const $value = val.getRaw();
               if ($value.evalIs(null)) {
                 // Ignore
               } else {
@@ -2266,7 +2266,7 @@ export function makeExampleSchema(
         applyPlan: EXPORTABLE(
           (TYPES, sql) =>
             function plan($parent: BooleanFilterStep, val) {
-              const $value = val.$.getRaw();
+              const $value = val.getRaw();
               if ($value.evalIs(null)) {
                 // Ignore
               } else {
@@ -2295,7 +2295,7 @@ export function makeExampleSchema(
         applyPlan: EXPORTABLE(
           (BooleanFilterStep, sql) =>
             function plan($messageFilter, arg) {
-              const $value = arg.$.getRaw();
+              const $value = arg.getRaw();
               if ($value.evalIs(null)) {
                 // Ignore
               } else {
@@ -2303,7 +2303,7 @@ export function makeExampleSchema(
                   $messageFilter,
                   sql`${$messageFilter.alias}.featured`,
                 );
-                arg.$.apply(plan);
+                arg.apply(plan);
               }
             },
           [BooleanFilterStep, sql],
@@ -2323,7 +2323,7 @@ export function makeExampleSchema(
         applyPlan: EXPORTABLE(
           (TYPES, sql) =>
             function plan($condition: PgConditionStep<any>, arg) {
-              const $value = arg.$.getRaw();
+              const $value = arg.getRaw();
               if ($value.evalIs(null)) {
                 $condition.where(sql`${$condition.alias}.name is null`);
               } else {
@@ -2355,10 +2355,10 @@ export function makeExampleSchema(
               $manyFilter: ManyFilterStep<typeof messageResource>,
               arg,
             ) {
-              const $value = arg.$.getRaw();
+              const $value = arg.getRaw();
               if (!$value.evalIs(null)) {
                 const plan = $manyFilter.some();
-                arg.$.apply(plan);
+                arg.apply(plan);
               }
             },
           [],
@@ -2378,7 +2378,7 @@ export function makeExampleSchema(
         applyPlan: EXPORTABLE(
           (ManyFilterStep, messageResource) =>
             function plan($condition, arg) {
-              const $value = arg.$.getRaw();
+              const $value = arg.getRaw();
               if (!$value.evalIs(null)) {
                 const plan = new ManyFilterStep(
                   $condition,
@@ -2386,7 +2386,7 @@ export function makeExampleSchema(
                   ["id"],
                   ["forum_id"],
                 );
-                arg.$.apply(plan);
+                arg.apply(plan);
               }
             },
           [ManyFilterStep, messageResource],
@@ -2449,7 +2449,7 @@ export function makeExampleSchema(
                   $messages: PgSelectStep<typeof messageResource>,
                   arg,
                 ) {
-                  $messages.setFirst(arg.$.getRaw());
+                  $messages.setFirst(arg.getRaw());
                   return null;
                 },
               [],
@@ -2517,7 +2517,7 @@ export function makeExampleSchema(
                   $connection: ResourceConnectionPlan<typeof messageResource>,
                   arg,
                 ) {
-                  $connection.setFirst(arg.$.getRaw());
+                  $connection.setFirst(arg.getRaw());
                   return null;
                 },
               [],
@@ -2532,7 +2532,7 @@ export function makeExampleSchema(
                   $connection: ResourceConnectionPlan<typeof messageResource>,
                   arg,
                 ) {
-                  $connection.setLast(arg.$.getRaw());
+                  $connection.setLast(arg.getRaw());
                   return null;
                 },
               [],
@@ -3659,7 +3659,7 @@ export function makeExampleSchema(
                   $forums: PgSelectStep<typeof forumResource>,
                   arg,
                 ) {
-                  $forums.setFirst(arg.$.getRaw());
+                  $forums.setFirst(arg.getRaw());
                   return null;
                 },
               [],
@@ -3779,7 +3779,7 @@ export function makeExampleSchema(
                   $connection: ResourceConnectionPlan<typeof messageResource>,
                   val,
                 ) {
-                  $connection.setFirst(val.$.getRaw());
+                  $connection.setFirst(val.getRaw());
                   return null;
                 },
               [],
@@ -3794,7 +3794,7 @@ export function makeExampleSchema(
                   $connection: ResourceConnectionPlan<typeof messageResource>,
                   arg,
                 ) {
-                  $connection.setLast(arg.$.getRaw());
+                  $connection.setLast(arg.getRaw());
                   return null;
                 },
               [],
@@ -3809,7 +3809,7 @@ export function makeExampleSchema(
                   $connection: ResourceConnectionPlan<typeof messageResource>,
                   arg,
                 ) {
-                  $connection.setAfter(arg.$.getRaw());
+                  $connection.setAfter(arg.getRaw());
                   return null;
                 },
               [],
@@ -3824,7 +3824,7 @@ export function makeExampleSchema(
                   $connection: ResourceConnectionPlan<typeof messageResource>,
                   arg,
                 ) {
-                  $connection.setBefore(arg.$.getRaw());
+                  $connection.setBefore(arg.getRaw());
                   return null;
                 },
               [],
@@ -3840,7 +3840,7 @@ export function makeExampleSchema(
                   arg,
                 ) {
                   const $messages = $connection.getSubplan();
-                  const val = arg.$.getRaw().eval();
+                  const val = arg.getRaw().eval();
                   if (!Array.isArray(val)) {
                     throw new GraphQLError(
                       "Invalid valus supplied to 'orderBy'",
@@ -4145,7 +4145,7 @@ export function makeExampleSchema(
                 function plan(_$root: any, $each: __ListTransformStep, val) {
                   const $commentables =
                     $each.getListStep() as RelationalCommentablesStep;
-                  $commentables.setFirst(val.$.getRaw());
+                  $commentables.setFirst(val.getRaw());
                   return null;
                 },
               [],
@@ -4450,7 +4450,7 @@ export function makeExampleSchema(
                   $connection: ResourceConnectionPlan<typeof messageResource>,
                   val,
                 ) {
-                  $connection.setFirst(val.$.getRaw());
+                  $connection.setFirst(val.getRaw());
                   return null;
                 },
               [],
@@ -4465,7 +4465,7 @@ export function makeExampleSchema(
                   $connection: ResourceConnectionPlan<typeof messageResource>,
                   arg,
                 ) {
-                  $connection.setLast(arg.$.getRaw());
+                  $connection.setLast(arg.getRaw());
                   return null;
                 },
               [],
@@ -4480,7 +4480,7 @@ export function makeExampleSchema(
                   $connection: ResourceConnectionPlan<typeof messageResource>,
                   arg,
                 ) {
-                  $connection.setOffset(arg.$.getRaw());
+                  $connection.setOffset(arg.getRaw());
                   return null;
                 },
               [],
@@ -4495,7 +4495,7 @@ export function makeExampleSchema(
                   $connection: ResourceConnectionPlan<typeof messageResource>,
                   arg,
                 ) {
-                  $connection.setAfter(arg.$.getRaw());
+                  $connection.setAfter(arg.getRaw());
                   return null;
                 },
               [],
@@ -4510,7 +4510,7 @@ export function makeExampleSchema(
                   $connection: ResourceConnectionPlan<typeof messageResource>,
                   arg,
                 ) {
-                  $connection.setBefore(arg.$.getRaw());
+                  $connection.setBefore(arg.getRaw());
                   return null;
                 },
               [],
@@ -4531,7 +4531,7 @@ export function makeExampleSchema(
                   arg,
                 ) {
                   const $collection = $connection.getSubplan();
-                  const val = arg.$.getRaw().eval();
+                  const val = arg.getRaw().eval();
                   if (!Array.isArray(val)) {
                     throw new Error("Invalid!");
                   }
@@ -4840,9 +4840,9 @@ export function makeExampleSchema(
               for (const key of ["title", "description", "note"] as Array<
                 keyof typeof relationalPostsResource.codec.attributes
               >) {
-                const $value = fieldArgs.$.getRaw(["input", key]);
+                const $value = fieldArgs.getRaw(["input", key]);
                 if (!$value.evalIs(undefined)) {
-                  const $value = fieldArgs.$.get(["input", key]);
+                  const $value = fieldArgs.get(["input", key]);
                   $post.set(key, $value);
                 }
               }
@@ -4960,13 +4960,13 @@ export function makeExampleSchema(
           (pgUpdateSingle, relationalPostsResource) =>
             function plan(_$root, fieldArgs) {
               const $post = pgUpdateSingle(relationalPostsResource, {
-                id: fieldArgs.$.get(["input", "id"]),
+                id: fieldArgs.get(["input", "id"]),
               });
               for (const key of ["title", "description", "note"] as Array<
                 keyof typeof relationalPostsResource.codec.attributes
               >) {
-                const $rawValue = fieldArgs.$.getRaw(["input", "patch", key]);
-                const $value = fieldArgs.$.get(["input", "patch", key]);
+                const $rawValue = fieldArgs.getRaw(["input", "patch", key]);
+                const $value = fieldArgs.get(["input", "patch", key]);
                 // TODO: test that we differentiate between value set to null and
                 // value not being present
                 if (!$rawValue.evalIs(undefined)) {
@@ -5116,8 +5116,8 @@ export function makeExampleSchema(
         type: ForumMessageSubscriptionPayload,
         subscribePlan: EXPORTABLE(
           (context, jsonParse, lambda, listen) =>
-            function subscribePlan(_$root, fieldArgs) {
-              const $forumId = fieldArgs.$.get("forumId");
+            function subscribePlan(_$root, args) {
+              const $forumId = args.get("forumId");
               const $topic = lambda(
                 $forumId,
                 (id) => `forum:${id}:message`,

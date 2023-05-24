@@ -12,7 +12,6 @@ import { BaseStep } from "./index.js";
 import type { InputStep } from "./input.js";
 import type {
   FieldArgs,
-  FieldArgsUtils,
   InputObjectTypeInputPlanResolver,
   TargetStepOrCallback,
   TrackedArguments,
@@ -205,7 +204,7 @@ function withFieldArgsForArgumentsOrInputObject<
                   entity: argOrField as GraphQLArgument,
                 });
               } else {
-                return fieldArgs.$.get();
+                return fieldArgs.get();
               }
             }
           } else {
@@ -228,7 +227,7 @@ function withFieldArgsForArgumentsOrInputObject<
                   entity: argOrField as GraphQLInputField,
                 });
               } else {
-                return fieldArgs.$.get();
+                return fieldArgs.get();
               }
             }
           }
@@ -404,7 +403,7 @@ function withFieldArgsForArgumentsOrInputObject<
     }
   }
 
-  const utils: FieldArgsUtils = {
+  const fieldArgs: FieldArgs<Record<string, any>> = {
     get(path) {
       if (!path || (Array.isArray(path) && path.length === 0)) {
         analyzedCoordinates[""] = true;
@@ -412,7 +411,7 @@ function withFieldArgsForArgumentsOrInputObject<
           if (fields !== null) {
             return object(
               Object.values(fields).reduce((memo, arg) => {
-                memo[arg.name] = fieldArgs.$.get(arg.name);
+                memo[arg.name] = fieldArgs.get(arg.name);
                 return memo;
               }, Object.create(null)) ?? Object.create(null),
             );
@@ -455,7 +454,7 @@ function withFieldArgsForArgumentsOrInputObject<
               typeof targetStepOrCallback === "function"
                 ? targetStepOrCallback(fieldName)
                 : targetStepOrCallback;
-            fieldArgs.$.apply(target, fieldName);
+            fieldArgs.apply(target, fieldName);
           }
           return;
         } else {
@@ -493,24 +492,21 @@ function withFieldArgsForArgumentsOrInputObject<
     */
       return step;
     },
-  };
-  const fieldArgs: FieldArgs<Record<string, any>> = {
-    $: utils,
-    ...makeAccessor(fields),
+    $: makeAccessor(fields),
   };
 
   if (fields) {
     for (const fieldName of Object.keys(fields)) {
       Object.defineProperty(fieldArgs, `$${fieldName}`, {
         get() {
-          return fieldArgs.$.get(fieldName);
+          return fieldArgs.get(fieldName);
         },
         enumerable: true,
         configurable: false,
       });
       Object.defineProperty(fieldArgs, `$$${fieldName}`, {
         get() {
-          return fieldArgs.$.getRaw(fieldName);
+          return fieldArgs.getRaw(fieldName);
         },
         enumerable: true,
         configurable: false,
@@ -543,14 +539,14 @@ function withFieldArgsForArgumentsOrInputObject<
         }
         Object.defineProperty($, `$${fieldName}`, {
           get() {
-            return fieldArgs.$.get([...path, fieldName]);
+            return fieldArgs.get([...path, fieldName]);
           },
           enumerable: true,
           configurable: false,
         });
         Object.defineProperty($, `$$${fieldName}`, {
           get() {
-            return fieldArgs.$.getRaw([...path, fieldName]);
+            return fieldArgs.getRaw([...path, fieldName]);
           },
           enumerable: true,
           configurable: false,
@@ -572,7 +568,7 @@ function withFieldArgsForArgumentsOrInputObject<
     !(step instanceof ConstantStep && step.isNull())
   ) {
     if (!fields) {
-      fieldArgs.$.apply(step);
+      fieldArgs.apply(step);
     } else {
       const allKeys = Object.keys(analyzedCoordinates);
       const process = (
@@ -596,7 +592,7 @@ function withFieldArgsForArgumentsOrInputObject<
             process(inputObjectType.getFields(), newPath);
             // recurse
           } else {
-            fieldArgs.$.apply(step, newPath);
+            fieldArgs.apply(step, newPath);
           }
         }
       };
@@ -634,11 +630,11 @@ function withFieldArgsForArgOrField<
 }
 
 const defaultInputObjectTypeInputPlanResolver: InputObjectTypeInputPlanResolver =
-  (inputArgs, info) => {
+  (input, info) => {
     const fields = info.type.getFields();
     const obj: { [key: string]: ExecutableStep } = Object.create(null);
     for (const fieldName in fields) {
-      obj[fieldName] = inputArgs.$.get(fieldName);
+      obj[fieldName] = input.get(fieldName);
     }
     return object(obj);
   };

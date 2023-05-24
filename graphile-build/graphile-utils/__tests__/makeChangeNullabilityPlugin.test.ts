@@ -45,11 +45,11 @@ const makeSchema = (plugins: GraphileConfig.Plugin[]) =>
           `,
           plans: {
             Query: {
-              echo(_, { $message }) {
-                return $message;
+              echo(_, args) {
+                return args.get("message");
               },
-              echo2(_, { in: { $message } }) {
-                return $message;
+              echo2(_, args) {
+                return args.get(["in", "message"]);
               },
             },
           },
@@ -57,7 +57,6 @@ const makeSchema = (plugins: GraphileConfig.Plugin[]) =>
         ...plugins,
       ],
     },
-    // @ts-ignore
     {},
     {},
   );

@@ -98,7 +98,7 @@ export const NodeAccessorPlugin: GraphileConfig.Plugin = {
                   (codec, handler, lambda, nodeIdFieldName, specForHandler) =>
                     function plan(_$parent: ExecutableStep, args: FieldArgs) {
                       const $decoded = lambda(
-                        args.$.get(nodeIdFieldName),
+                        args.get(nodeIdFieldName),
                         specForHandler(handler, codec),
                       );
                       return handler.get(handler.getSpec($decoded));

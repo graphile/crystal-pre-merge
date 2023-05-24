@@ -69,8 +69,8 @@ const makeSchemaWithSpyAndPlugins = (
 const makeEchoSpy = (fn?: FieldPlanResolver<any, any, any>) =>
   jest.fn(
     fn ||
-      (($parent, fieldArgs) => {
-        return fieldArgs.get("message");
+      (($parent, args) => {
+        return args.get("message");
       }),
   );
 
@@ -78,8 +78,8 @@ describe("wrapping named plans", () => {
   const wrappers: Array<[number, PlanWrapperFn]> = [
     [0, (plan) => plan()],
     [1, (plan, $parent) => plan($parent)],
-    [2, (plan, $parent, fieldArgs) => plan($parent, fieldArgs)],
-    [3, (plan, $parent, fieldArgs, info) => plan($parent, fieldArgs, info)],
+    [2, (plan, $parent, args) => plan($parent, args)],
+    [3, (plan, $parent, args, info) => plan($parent, args, info)],
   ];
   it.each(wrappers)(
     "passes args by default when passed %i arguments",
@@ -335,8 +335,8 @@ describe("wrapping plans matching a filter", () => {
       scope: GraphileBuild.ScopeObjectFieldsField;
     }> =
       ({ scope }) =>
-      (plan, user, fieldArgs, _info) => {
-        const $before = lambda(fieldArgs.$.get(), (argValues) => {
+      (plan, user, args, _info) => {
+        const $before = lambda(args.get(), (argValues) => {
           before.push([
             `Mutation '${scope.fieldName}' starting with arguments:`,
             argValues,
@@ -353,11 +353,11 @@ describe("wrapping plans matching a filter", () => {
 
         return $result;
       };
-    const add: FieldPlanResolver<any, any, any> = (_, fieldArgs) =>
+    const add: FieldPlanResolver<any, any, any> = (_, args) =>
       lambda(
         [
-          fieldArgs.$arg1 as ExecutableStep<number>,
-          fieldArgs.$arg2 as ExecutableStep<number>,
+          args.get("arg1") as ExecutableStep<number>,
+          args.get("arg2") as ExecutableStep<number>,
         ],
         ([arg1, arg2]) => arg1 + arg2,
       );
