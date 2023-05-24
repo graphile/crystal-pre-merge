@@ -286,14 +286,7 @@ export default makeExtendSchemaPlugin((build) => {
 
     plans: {
       Mutation: {
-        myCustomMutation(
-          _$root,
-          {
-            $: {
-              input: { $count },
-            },
-          },
-        ) {
+        myCustomMutation(_$root, { input: { $count } }) {
           /**
            * This step dictates the data that will be passed as the second argument
            * to the `withPgClientTransaction` callback. This is typically
