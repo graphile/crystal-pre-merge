@@ -4988,7 +4988,7 @@ export function makeExampleSchema(
         type: DeleteRelationalPostByIdPayload,
         plan: EXPORTABLE(
           (pgDeleteSingle, relationalPostsResource) =>
-            function plan(_$root, { input: { $id } }) {
+            function plan(_$root, { _input: { $id } }) {
               const $post = pgDeleteSingle(relationalPostsResource, {
                 id: $id,
               });
@@ -5013,7 +5013,7 @@ export function makeExampleSchema(
             sql,
             withPgClientTransaction,
           ) =>
-            function plan(_$root, { input: { $a } }) {
+            function plan(_$root, { _input: { $a } }) {
               const $transactionResult = withPgClientTransaction(
                 relationalPostsResource.executor,
                 object({

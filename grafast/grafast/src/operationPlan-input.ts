@@ -492,68 +492,44 @@ function withFieldArgsForArgumentsOrInputObject<
     */
       return step;
     },
-    $: makeAccessor(fields),
   };
-
-  if (fields) {
-    for (const fieldName of Object.keys(fields)) {
-      Object.defineProperty(fieldArgs, `$${fieldName}`, {
-        get() {
-          return fieldArgs.get(fieldName);
-        },
-        enumerable: true,
-        configurable: false,
-      });
-      Object.defineProperty(fieldArgs, `$$${fieldName}`, {
-        get() {
-          return fieldArgs.getRaw(fieldName);
-        },
-        enumerable: true,
-        configurable: false,
-      });
-    }
-  }
+  makeAccessor(fieldArgs, fields);
 
   function makeAccessor(
+    target: Record<string, any>,
     fields: Record<string, GraphQLArgument | GraphQLInputField> | null,
     path: string[] = [],
   ) {
-    const $ = Object.create(null);
-
     // Now define accessors for known properties
     if (fields) {
       for (const fieldName of Object.keys(fields)) {
         const field = fields[fieldName];
         const nullableType = getNullableType(field.type);
-        if (isInputObjectType(nullableType)) {
-          Object.defineProperty($, fieldName, {
-            get() {
-              return makeAccessor(nullableType.getFields(), [
-                ...path,
-                fieldName,
-              ]);
-            },
-            enumerable: true,
-            configurable: false,
-          });
-        }
-        Object.defineProperty($, `$${fieldName}`, {
+        Object.defineProperty(target, `$${fieldName}`, {
           get() {
             return fieldArgs.get([...path, fieldName]);
           },
           enumerable: true,
           configurable: false,
         });
-        Object.defineProperty($, `$$${fieldName}`, {
+        Object.defineProperty(target, `$$${fieldName}`, {
           get() {
             return fieldArgs.getRaw([...path, fieldName]);
           },
           enumerable: true,
           configurable: false,
         });
+        if (isInputObjectType(nullableType)) {
+          Object.defineProperty(target, `_${fieldName}`, {
+            get() {
+              const $ = Object.create(null);
+              makeAccessor($, nullableType.getFields(), [...path, fieldName]);
+              return $;
+            },
+          });
+        }
       }
     }
-    return $;
   }
 
   const step = (callback(fieldArgs) ?? parentPlan) as
