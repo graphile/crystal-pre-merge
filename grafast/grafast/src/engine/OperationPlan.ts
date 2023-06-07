@@ -45,6 +45,7 @@ import type {
 import { $$proxy, $$subroutine, $$timeout, $$ts } from "../interfaces.js";
 import type { PrintPlanGraphOptions } from "../mermaid.js";
 import { printPlanGraph } from "../mermaid.js";
+import type { ApplyAfterModeArg } from "../operationPlan-input.js";
 import { withFieldArgsForArguments } from "../operationPlan-input.js";
 import type { ListCapableStep, PolymorphicStep } from "../step.js";
 import {
@@ -74,6 +75,9 @@ import { LayerPlan } from "./LayerPlan.js";
 import { withGlobalLayerPlan } from "./lib/withGlobalLayerPlan.js";
 import { OutputPlan } from "./OutputPlan.js";
 import { StepTracker } from "./StepTracker.js";
+
+const ALWAYS_THROW_PLANNING_ERRORS =
+  process.env.ALWAYS_THROW_PLANNING_ERRORS === "1";
 
 // Work around TypeScript CommonJS `graphql_1.isListType` unoptimal access.
 const {
@@ -755,6 +759,7 @@ export class OperationPlan {
         POLYMORPHIC_ROOT_PATHS,
         fields,
         subscriptionPlanResolver,
+        "autoApplyAfterParentSubscribePlan",
         this.trackedRootValueStep,
         fieldSpec,
         trackedArguments,
@@ -1179,6 +1184,7 @@ export class OperationPlan {
           polymorphicPaths,
           fieldNodes,
           planResolver,
+          "autoApplyAfterParentPlan",
           parentStep,
           objectField,
           trackedArguments,
@@ -1740,6 +1746,7 @@ export class OperationPlan {
     polymorphicPaths: ReadonlySet<string> | null,
     fieldNodes: FieldNode[],
     planResolver: FieldPlanResolver<any, ExecutableStep, ExecutableStep>,
+    applyAfterMode: ApplyAfterModeArg,
     rawParentStep: ExecutableStep,
     field: GraphQLField<any, any>,
     trackedArguments: TrackedArguments,
@@ -1760,6 +1767,7 @@ export class OperationPlan {
         parentStep,
         trackedArguments,
         field,
+        applyAfterMode,
         (fieldArgs) =>
           planResolver(parentStep, fieldArgs, {
             field,
@@ -1828,6 +1836,13 @@ export class OperationPlan {
 
       return { step, haltTree };
     } catch (e) {
+      if (ALWAYS_THROW_PLANNING_ERRORS) throw e;
+
+      // FIXME: need to roll-back side-effect steps since they won't be
+      // tree-shaken away. In the mean time, let's just blow up the entire
+      // request.
+      if (Math.random() < 2) throw e;
+
       const step = withGlobalLayerPlan(
         layerPlan,
         polymorphicPaths,
@@ -1889,33 +1904,29 @@ export class OperationPlan {
 
   public withModifiers<T>(cb: () => T): T {
     // Stash previous modifiers
+    const previousModifierDepthCount = this.modifierDepthCount++;
+    const previousCount = this.modifierStepCount;
     const previousStack = this.modifierSteps.splice(
       0,
       this.modifierSteps.length,
     );
-    const previousModifierDepthCount = this.modifierDepthCount++;
+    this.modifierStepCount = 0;
     let result;
     let plansToApply;
     try {
-      const previousCount = this.modifierStepCount;
-      this.modifierStepCount = 0;
-      try {
-        result = cb();
-
-        // Remove the modifier plans from operationPlan and sort them ready for application.
-        plansToApply = this.modifierSteps
-          .splice(0, this.modifierSteps.length)
-          .reverse();
-      } finally {
-        // Restore previous modifiers
-        this.modifierStepCount = previousCount;
-      }
+      result = cb();
     } finally {
+      // Remove the modifier plans from operationPlan and sort them ready for application.
+      plansToApply = this.modifierSteps
+        .splice(0, this.modifierSteps.length)
+        .reverse();
+      // Restore previous modifiers
+      this.modifierStepCount = previousCount;
+      for (const mod of previousStack) {
+        this.modifierSteps.push(mod);
+      }
       // Restore previous depth
       this.modifierDepthCount = previousModifierDepthCount;
-    }
-    for (const mod of previousStack) {
-      this.modifierSteps.push(mod);
     }
 
     // Apply the plans.

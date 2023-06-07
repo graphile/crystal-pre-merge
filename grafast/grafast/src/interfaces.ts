@@ -140,6 +140,8 @@ export interface GrafastArgumentExtensions {
   // fooPlan?: ArgumentPlanResolver<any, any, any, any, any>;
   inputPlan?: ArgumentInputPlanResolver;
   applyPlan?: ArgumentApplyPlanResolver;
+  autoApplyAfterParentPlan?: boolean;
+  autoApplyAfterParentSubscribePlan?: boolean;
 }
 
 export interface GrafastInputObjectTypeExtensions {
@@ -150,6 +152,8 @@ export interface GrafastInputFieldExtensions {
   // fooPlan?: InputObjectFieldPlanResolver<any, any, any, any>;
   inputPlan?: InputObjectFieldInputPlanResolver;
   applyPlan?: InputObjectFieldApplyPlanResolver;
+  autoApplyAfterParentInputPlan?: boolean;
+  autoApplyAfterParentApplyPlan?: boolean;
 }
 
 export interface GrafastObjectTypeExtensions {
@@ -311,7 +315,8 @@ export type BaseGraphQLInputObject = BaseGraphQLArguments;
 export type TargetStepOrCallback =
   | ExecutableStep
   | ModifierStep
-  | ((indexOrFieldName: number | string) => TargetStepOrCallback);
+  | (() => ModifierStep);
+// | ((indexOrFieldName: number | string) => TargetStepOrCallback);
 
 type PathTuple<
   TObj extends Record<string, any>,
@@ -692,6 +697,8 @@ export type GrafastArgumentConfig<
   type: TInputType;
   inputPlan?: ArgumentInputPlanResolver<any>;
   applyPlan?: ArgumentApplyPlanResolver<any, any>;
+  autoApplyAfterParentPlan?: boolean;
+  autoApplyAfterParentSubscribePlan?: boolean;
 };
 
 /**
@@ -707,6 +714,8 @@ export type GrafastInputFieldConfig<
   type: TInputType;
   inputPlan?: InputObjectFieldInputPlanResolver;
   applyPlan?: InputObjectFieldApplyPlanResolver<any>;
+  autoApplyAfterParentInputPlan?: boolean;
+  autoApplyAfterParentApplyPlan?: boolean;
 };
 
 /**
