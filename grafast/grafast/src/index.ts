@@ -72,6 +72,7 @@ import {
   JSONArray,
   JSONObject,
   JSONValue,
+  Maybe,
   NodeIdCodec,
   NodeIdHandler,
   OutputPlanForType,
@@ -81,7 +82,6 @@ import {
   StepOptimizeOptions,
   StepStreamOptions,
   TypedEventEmitter,
-  Maybe,
 } from "./interfaces.js";
 import { polymorphicWrap } from "./polymorphic.js";
 import {
@@ -336,6 +336,7 @@ export {
   LoadOptions,
   LoadStep,
   makeGrafastSchema,
+  Maybe,
   ModifierStep,
   newGrafastFieldConfigBuilder,
   newInputObjectTypeBuilder,
@@ -388,7 +389,6 @@ export {
   stripAnsi,
   subscribe,
   TypedEventEmitter,
-  Maybe,
   UnbatchedExecutableStep,
 };
 
