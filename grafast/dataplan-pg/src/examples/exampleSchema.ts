@@ -3715,7 +3715,9 @@ export function makeExampleSchema(
         plan: EXPORTABLE(
           (deoptimizeIfAppropriate, forumResource) =>
             function plan(_$root, { $id }) {
-              const $forum = forumResource.get({ id: $id });
+              const $forum = forumResource.get({
+                id: $id as ExecutableStep<string>,
+              });
               deoptimizeIfAppropriate($forum);
               return $forum;
             },
@@ -3732,7 +3734,9 @@ export function makeExampleSchema(
         plan: EXPORTABLE(
           (deoptimizeIfAppropriate, messageResource) =>
             function plan(_$root, { $id }) {
-              const $message = messageResource.get({ id: $id });
+              const $message = messageResource.get({
+                id: $id as ExecutableStep<string>,
+              });
               deoptimizeIfAppropriate($message);
               return $message;
             },
@@ -4088,7 +4092,7 @@ export function makeExampleSchema(
           (singleTableItemInterface, singleTableItemsResource) =>
             function plan(_$root, { $id }) {
               const $item: SingleTableItemStep = singleTableItemsResource.get({
-                id: $id,
+                id: $id as ExecutableStep<number>,
               });
               return singleTableItemInterface($item);
             },
@@ -4107,7 +4111,7 @@ export function makeExampleSchema(
           (constant, singleTableItemsResource) =>
             function plan(_$root, { $id }) {
               const $item: SingleTableItemStep = singleTableItemsResource.get({
-                id: $id,
+                id: $id as ExecutableStep<number>,
                 type: constant("TOPIC"),
               });
               return $item;
@@ -4127,7 +4131,7 @@ export function makeExampleSchema(
           (relationalItemInterface, relationalItemsResource) =>
             function plan(_$root, { $id }) {
               const $item: RelationalItemStep = relationalItemsResource.get({
-                id: $id,
+                id: $id as ExecutableStep<number>,
               });
               return relationalItemInterface($item);
             },
@@ -4146,7 +4150,7 @@ export function makeExampleSchema(
           (relationalTopicsResource) =>
             function plan(_$root, { $id }) {
               return relationalTopicsResource.get({
-                id: $id,
+                id: $id as ExecutableStep<number>,
               });
             },
           [relationalTopicsResource],
@@ -4212,7 +4216,7 @@ export function makeExampleSchema(
           (unionItemUnion, unionItemsResource) =>
             function plan(_$root, { $id }) {
               const $item: UnionItemStep = unionItemsResource.get({
-                id: $id,
+                id: $id as ExecutableStep<number>,
               });
               return unionItemUnion($item);
             },
@@ -4231,7 +4235,7 @@ export function makeExampleSchema(
           (unionTopicsResource) =>
             function plan(_$root, { $id }) {
               return unionTopicsResource.get({
-                id: $id,
+                id: $id as ExecutableStep<number>,
               });
             },
           [unionTopicsResource],
@@ -4301,7 +4305,9 @@ export function makeExampleSchema(
         plan: EXPORTABLE(
           (personResource) =>
             function plan(_$root, { $personId }) {
-              return personResource.get({ person_id: $personId });
+              return personResource.get({
+                person_id: $personId as ExecutableStep<number>,
+              });
             },
           [personResource],
         ),
@@ -4403,7 +4409,7 @@ export function makeExampleSchema(
             sql,
             thirdPartyVulnerabilitiesResource,
           ) =>
-            function plan(_, { $$first, $$offset }) {
+            function plan(_, { $first, $offset }) {
               // IMPORTANT: for cursor pagination, type must be part of cursor condition
               const $vulnerabilities = pgUnionAll({
                 attributes: {
@@ -4429,8 +4435,8 @@ export function makeExampleSchema(
                     TYPES.float,
                   )}`,
               });
-              $vulnerabilities.setFirst($$first!);
-              $vulnerabilities.setOffset($$offset!);
+              $vulnerabilities.setFirst($first!);
+              $vulnerabilities.setOffset($offset!);
               return $vulnerabilities;
             },
           [
@@ -5014,9 +5020,11 @@ export function makeExampleSchema(
         type: DeleteRelationalPostByIdPayload,
         plan: EXPORTABLE(
           (pgDeleteSingle, relationalPostsResource) =>
-            function plan(_$root, { _input: { $id } }) {
+            function plan(_$root, { $input }) {
               const $post = pgDeleteSingle(relationalPostsResource, {
-                id: $id,
+                id: ($input as __InputObjectStep | __TrackedValueStep).get(
+                  "id",
+                ) as ExecutableStep<number>,
               });
               return $post;
             },
@@ -5039,7 +5047,10 @@ export function makeExampleSchema(
             sql,
             withPgClientTransaction,
           ) =>
-            function plan(_$root, { _input: { $a } }) {
+            function plan(_$root, { $input }) {
+              const $a = ($input as __InputObjectStep | __TrackedValueStep).get(
+                "a",
+              );
               const $transactionResult = withPgClientTransaction(
                 relationalPostsResource.executor,
                 object({

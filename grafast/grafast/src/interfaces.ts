@@ -348,7 +348,9 @@ export type FieldArgs<
   /** Gets the value, evaluating the `inputPlan` at each field if appropriate */
   get(path?: keyof TInput | [] | PathTuple<TInput>): ExecutableStep;
   /** Gets the value *without* calling any `inputPlan`s */
-  getRaw(path?: keyof TInput | [] | PathTuple<TInput>): InputStep;
+  getRaw<TPath extends keyof TInput | [] | PathTuple<TInput>>(
+    path?: TPath,
+  ): InputStep;
   /** This also works (without path) to apply each list entry against $target */
   apply(
     $target: TargetStepOrCallback,
@@ -358,25 +360,9 @@ export type FieldArgs<
 
 type FieldArgsSteps<TObj extends Record<string, any>> =
   "$IS_STRING_OR_ANY$" extends keyof TObj
-    ? Record<`$${string}`, ExecutableStep> &
-        Record<`$$${string}`, InputStep> &
-        Record<
-          `_${string}`,
-          Record<`$${string}`, ExecutableStep> &
-            Record<`$$${string}`, InputStep> &
-            Record<`_${string}`, any>
-        >
+    ? Record<`$${string}`, InputStep>
     : {
-        [key in string & keyof TObj as `$${key}`]: ExecutableStep;
-      } & {
-        [key in string & keyof TObj as `$$${key}`]: InputStep;
-      } & {
-        [key in string & keyof TObj as `_${key}`]: TObj[key] extends Record<
-          string,
-          any
-        >
-          ? FieldArgsSteps<TObj[key]>
-          : never;
+        [key in string & keyof TObj as `$${key}`]: InputStep;
       };
 
 export interface FieldInfo {
