@@ -47,8 +47,9 @@ export function hookArgs(
     resolvedPreset.plugins &&
     resolvedPreset.plugins.length > 0
   ) {
-    const event = { args, ctx, resolvedPreset };
-    const result = hook(resolvedPreset, "args", event);
+    const event = { args };
+    const extra = { ctx, resolvedPreset };
+    const result = hook(resolvedPreset, "args", event, extra);
     if (isPromiseLike(result)) {
       return result.then(() => finalize(event.args));
     } else {

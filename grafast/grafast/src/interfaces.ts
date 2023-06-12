@@ -118,11 +118,15 @@ declare global {
     }
     interface GrafastHooks {
       args: PluginHook<
-        (event: {
-          args: ExecutionArgs;
-          ctx: Grafast.RequestContext;
-          resolvedPreset: GraphileConfig.ResolvedPreset;
-        }) => PromiseOrValue<void>
+        (
+          event: {
+            args: ExecutionArgs;
+          },
+          extra: {
+            ctx: Grafast.RequestContext;
+            resolvedPreset: GraphileConfig.ResolvedPreset;
+          },
+        ) => PromiseOrValue<void>
       >;
     }
     interface Plugin {

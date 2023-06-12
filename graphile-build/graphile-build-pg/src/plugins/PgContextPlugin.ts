@@ -12,7 +12,7 @@ export const PgContextPlugin: GraphileConfig.Plugin = {
 
   grafast: {
     hooks: {
-      args({ args, ctx, resolvedPreset: config }) {
+      args({ args }, { ctx, resolvedPreset: config }) {
         if (!args.contextValue) {
           args.contextValue = Object.create(null);
         }
