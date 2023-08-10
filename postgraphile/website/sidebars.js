@@ -49,14 +49,14 @@ const sidebars = {
       label: "Tables",
       link: {
         type: "doc",
-        id: "tables",
+        id: "tables/index",
       },
       items: [
-        "relations",
-        "connections",
-        "filtering",
-        "crud-mutations",
-        "node-id",
+        "tables/relations",
+        "tables/connections",
+        "tables/filtering",
+        "tables/crud-mutations",
+        "tables/node-id",
       ],
     },
     {
