@@ -47,6 +47,7 @@ const sidebars = {
     {
       type: "category",
       label: "Tables",
+      collapsed: false,
       link: {
         type: "doc",
         id: "tables/index",
