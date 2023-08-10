@@ -4,7 +4,7 @@ path: /postgraphile/custom-mutations/
 title: Custom Mutations
 ---
 
-PostGraphile automatically generates [CRUD Mutations](./crud-mutations/) for
+PostGraphile automatically generates [CRUD Mutations](./tables/crud-mutations.md) for
 you; but it's rare that these will cover all your needs - and many people just
 disable them outright. Custom mutations enable you to write exactly the business
 logic you need with access to all of your data all wrapped up in a PostgreSQL

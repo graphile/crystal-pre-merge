@@ -24,7 +24,7 @@ The enhancements that we apply on top of Relay's connection spec include:
   use `nodes { ... }` rather than `edges { cursor, node { ... } }`
 
 Many connections (specifically those coming from tables, views and relations)
-support [filtering](./filtering/) the return results with a conditon.
+support [filtering](./filtering.md) the return results with a conditon.
 
 ### Advice
 
@@ -35,7 +35,7 @@ ideal) and a feature that regular pagination cannot give you (namely cursor
 pagination, which is highly effective in infinite scrolling contexts where the
 underlying data is constantly being added to, such as news feeds). However, if
 performance is critical to you or if you prefer simple lists over GraphQL
-connections then you can use [behaviors](./behavior.md) to configure your
+connections then you can use [behaviors](../behavior.md) to configure your
 preferences. To enable lists and disable connections, you might add something
 like this to your preset:
 
@@ -48,7 +48,7 @@ const preset = {
 ```
 
 You can also enable both with `+connection +list`. You can even configure this
-on a per-entity basis with [smart tags](./smart-tags.md#behavior) if you like!
+on a per-entity basis with [smart tags](../smart-tags.md#behavior) if you like!
 
 ### Benchmarking
 

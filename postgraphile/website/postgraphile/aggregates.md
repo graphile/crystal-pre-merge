@@ -20,7 +20,7 @@ these on the client).
 
 ### Aggregates only work on Relay connection
 
-Thanks to their expansibility, relay [connections](./connections) were the
+Thanks to their expansibility, relay [connections](./tables/connections.md) were the
 perfect place to add aggregates support. If you're using a behavior
 configuration that prefers lists over connections (e.g. `-connection +list`)
 then you can override it on a per-collection basis with the [`@behavior

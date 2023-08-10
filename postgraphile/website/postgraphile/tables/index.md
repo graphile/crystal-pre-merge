@@ -96,7 +96,7 @@ contain functionality that you can't actually use.
 
 :::note
 
-We strongly [advise against](./requirements.md) using column-based
+We strongly [advise against](../requirements.md) using column-based
 `SELECT` grants with PostGraphile. Instead, split your permission concerns into
 separate tables and join them with one-to-one relations.
 

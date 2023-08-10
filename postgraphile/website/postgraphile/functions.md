@@ -429,7 +429,7 @@ Certain STABLE/IMMUTABLE functions will be exposed by PostGraphile as
 
 As well as scalars, compound types, and arrays of these, PostgreSQL functions
 can also return sets. Sets emulate tables, and so it's natural for PostGraphile
-to expose these to GraphQL using [connections](./connections/) (or, if your
+to expose these to GraphQL using [connections](./tables/connections.md) (or, if your
 behaviors are configured to prefer lists, as lists).
 
 SETOF functions can be a powerful way of exposing data to the user that may be

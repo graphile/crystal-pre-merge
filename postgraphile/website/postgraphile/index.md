@@ -109,8 +109,8 @@ Some of the features we offer:
 - Run as a CLI, as a Node.js middleware, or a standalone GraphQL schema
 - Easy customization via [smart tags](./smart-tags)
 - Explain your operations via [Ruru](https://grafast.org/ruru/) (our Gra*fast*-enhanced Graph*i*QL IDE)
-- [Auto-discovered relations](./relations/)
-- [Automatic CRUD mutations](./crud-mutations/) e.g. `updatePost`
+- [Auto-discovered relations](./tables/relations.md)
+- [Automatic CRUD mutations](./tables/crud-mutations.md) e.g. `updatePost`
 - Almost all features are optional, and most can be customised on a per-table, per-column or per-constraint basis (as appropriate)
 - Incredible versatility via a wide array of plugins:
   - Aggregates
