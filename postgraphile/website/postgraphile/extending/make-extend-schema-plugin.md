@@ -37,7 +37,7 @@ information and helpers defined by various plugins, in particular the registry
 (`build.input.pgRegistry`) which contains all the resources and codecs from
 introspection, the inflection functions (`build.inflection`), and the SQL helper
 (`build.sql`) which is an instance of
-[pg-sql2](https://www.npmjs.com/package/pg-sql2).
+[pg-sql2](https://star.graphile.org/pg-sql2).
 
 The callback should return an object with the following keys:
 
