@@ -47,8 +47,8 @@ There's multiple ways of adding tags to entities:
 
 - The [postgraphile.tags.json5](./smart-tags-file/) file
 - [Smart Comments](./smart-comments/) in the database via `COMMENT`
-- A [`makePgSmartTagsPlugin`](./make-pg-smart-tags-plugin/) instance
-- Your own [plugin](./extending-raw/); specifically:
+- A [`makePgSmartTagsPlugin`](./extending/make-pg-smart-tags-plugin.md) instance
+- Your own [plugin](./extending/extending-raw.md); specifically:
   - implement the `gather.hooks.pgIntrospection_introspection` callback,
   - get the relevant entity,
   - call `entity.getTagsAndDescription()` on it,

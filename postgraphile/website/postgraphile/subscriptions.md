@@ -35,7 +35,7 @@ is changed from `http` or `https` to `ws` or `wss` respectively.
 ## Adding subscription fields
 
 The easiest way to add subscription fields is by using
-[`makeExtendSchemaPlugin`](./make-extend-schema-plugin) to extend the
+[`makeExtendSchemaPlugin`](./extending/make-extend-schema-plugin.md) to extend the
 `Subscription` type and add your field. Your subscription fields will typically
 leverage the Gra*fast*
 [`listen()`](https://grafast.org/grafast/step-library/standard-steps/listen)

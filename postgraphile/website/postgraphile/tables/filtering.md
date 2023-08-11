@@ -23,12 +23,12 @@ to force it remove it.
 You can extend PostGraphile's schema with more advance filtering capabilities by
 adding fields using [custom queries](../custom-queries.md),
 [computed columns](../computed-columns.md) or by using
-[makeExtendSchemaPlugin](../make-extend-schema-plugin.md).
+[makeExtendSchemaPlugin](../extending/make-extend-schema-plugin.md).
 
 To add a condition to an existing condition another option is the
-[`makeAddPgTableConditionPlugin`](../make-add-pg-table-condition-plugin.md). You
+[`makeAddPgTableConditionPlugin`](../extending/make-add-pg-table-condition-plugin.md). You
 can also augment PostGraphile's existing connections using custom [Graphile
-Engine plugins](../extending-raw.md), such as the following:
+Engine plugins](../extending/extending-raw.md), such as the following:
 
 #### Filter Plugin
 
@@ -57,4 +57,4 @@ it out! (But do keep the caveats above in mind.)
 #### Other plugins
 
 Some more of the community plugins relate to filtering, you can read more about
-them on the [community plugins page](../community-plugins.md)
+them on the [community plugins page](../extending/community-plugins.md)

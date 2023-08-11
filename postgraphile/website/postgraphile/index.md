@@ -36,7 +36,7 @@ it truly runs rings around traditional API development practices.
 
 Built on a [plugin system](./extending), you can easily pick and choose the
 features that you want in your API (and even develop your own or mix in features
-[from the community](./community-plugins)). Using the
+[from the community](./extending/community-plugins.md)). Using the
 [smart tags system](./smart-tags) you can easily tweak which entities appear,
 and how they're exposed. If you ultimately decide an auto-generated GraphQL API
 may not be for you, PostGraphile has an ['export' feature](./exporting-schema)
