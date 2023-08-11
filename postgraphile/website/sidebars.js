@@ -114,7 +114,7 @@ const sidebars = {
       collapsed: false,
       link: {
         type: "doc",
-        id: "extending",
+        id: "extending/index",
       },
       items: [
         "make-add-inflectors-plugin",
