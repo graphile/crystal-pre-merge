@@ -1,0 +1,3 @@
+---
+title: "Inflector Plugin Examples"
+---

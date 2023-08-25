@@ -72,7 +72,15 @@ const sidebars = {
         "custom-queries",
         "custom-mutations",
         "function-restrictions",
-        "function-gallery",
+        {
+          type: "category",
+          label: "Function Gallery",
+          link: {
+            type: "doc",
+            id: "function-gallery",
+          },
+          items: ["function-gallery/custom-queries"],
+        },
       ],
     },
     "enums",
@@ -126,7 +134,15 @@ const sidebars = {
         "make-add-pg-table-order-by-plugin",
         "make-pg-smart-tags-plugin",
         "extending-raw",
-        "plugin-gallery",
+        {
+          type: "category",
+          label: "Plugin Gallery",
+          link: {
+            type: "doc",
+            id: "plugin-gallery",
+          },
+          items: ["plugin-gallery/inflector"],
+        },
         "community-plugins",
       ],
     },
