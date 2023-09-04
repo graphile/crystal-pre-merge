@@ -1,24 +1,16 @@
-import { DataLoader } from "dataloader";
+import { loadOne } from "grafast";
 
 async function batchGetUserById(ids) {
   const users = await db.users.find({ id: ids });
   return ids.map((id) => users.find((user) => user.id === id));
 }
 
-function makeGraphQLContext(req) {
-  return {
-    userLoader: new DataLoader(batchGetUserById),
-    postLoader: new DataLoader(batchGetPostById),
-    postsByForumIdLoader: new DataLoader(batchGetPostsByForumId),
-    // ... x 300
-  };
-}
 
-const resolvers = {
+const plans = {
   Post: {
-    author(post, _, context) {
-      const userId = post.author_id;
-      return context.userLoader.load(userId);
+    author($post) {
+      const $userId = $post.get("author_id");
+      return loadOne($userId, batchGetUserById);
     },
   },
 };
