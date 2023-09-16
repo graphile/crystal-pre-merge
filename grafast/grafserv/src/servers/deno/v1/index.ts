@@ -53,9 +53,6 @@ function getDigest(req: Request, ctx: Deno.ServeHandlerInfo): RequestDigest {
 }
 
 export class DenoGrafserv extends GrafservBase {
-  constructor(config: GrafservConfig) {
-    super(config);
-  }
   public async handler(req: Request, ctx: Deno.ServeHandlerInfo) {
     const digest = getDigest(req, ctx);
 
