@@ -1,6 +1,0 @@
-## expect(errors).toBeFalsy()
-## expect(queries).toHaveLength(1)
-## expect(data.forumNames).toEqual(["Cats", "Dogs", "Postgres"])
-{
-  forumNames
-}

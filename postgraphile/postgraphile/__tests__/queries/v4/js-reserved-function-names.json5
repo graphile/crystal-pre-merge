@@ -1,9 +1,0 @@
-{
-  await: 10,
-  case: 40,
-  valueOf: 20,
-  nullById: {
-    yield: 10,
-    break: "10 am",
-  },
-}

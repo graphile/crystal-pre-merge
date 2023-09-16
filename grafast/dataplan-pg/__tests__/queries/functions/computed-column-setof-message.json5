@@ -1,9 +1,0 @@
-{
-  forum: {
-    featuredMessages: [
-      {
-        body: "Postgres = awesome -- Bob",
-      },
-    ],
-  },
-}
