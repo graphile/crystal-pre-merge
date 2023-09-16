@@ -14,21 +14,26 @@ import type {
 declare global {
   namespace Grafast {
     interface RequestContext {
-      ctx: Deno.ServeHandlerInfo;
+      denov1: {
+        ctx: Deno.ServeHandlerInfo;
+      };
     }
   }
 }
 
 function getDigest(req: Request, ctx: Deno.ServeHandlerInfo): RequestDigest {
+  const url = new URL(req.url);
   return {
+    // TODO: figure out the actual HTTP version
     httpVersionMajor: 2,
     httpVersionMinor: 0,
-    isSecure: new URL(req.url).protocol === "https",
+    isSecure: url.protocol === "https",
     method: req.method,
-    path: new URL(req.url).pathname,
+    path: url.pathname,
     headers: Object.fromEntries(req.headers.entries()),
     getQueryParams() {
-      return Object.fromEntries(new URL(req.url).searchParams) as Record<
+      // TODO: on duplicate keys, this should convert to an array instead
+      return Object.fromEntries(url.searchParams) as Record<
         string,
         string | string[]
       >;
@@ -39,7 +44,11 @@ function getDigest(req: Request, ctx: Deno.ServeHandlerInfo): RequestDigest {
         json: await req.json(),
       } as GrafservBodyJSON;
     },
-    requestContext: { ctx },
+    requestContext: {
+      denov1: {
+        ctx,
+      },
+    },
   };
 }
 
