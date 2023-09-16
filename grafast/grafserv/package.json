@@ -30,6 +30,10 @@
       "types": "./dist/servers/h3/v1/index.d.ts",
       "default": "./dist/servers/h3/v1/index.js"
     },
+    "./deno/v1": {
+      "types": "./dist/servers/deno/v1/index.d.ts",
+      "default": "./dist/servers/deno/v1/index.js"
+    },
     "./ruru": {
       "types": "./fwd/ruru/index.d.ts",
       "node": "./fwd/ruru/index.js",
