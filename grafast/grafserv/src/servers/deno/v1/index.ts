@@ -21,6 +21,15 @@ declare global {
   }
 }
 
+/* This block is to trick TypeScript into compiling; really we need the Deno types in Node.js so we can build the package. */
+declare global {
+  const Response: any;
+  namespace Deno {
+    export type ServeHandlerInfo = any;
+  }
+  type Request = any;
+}
+
 function getDigest(req: Request, ctx: Deno.ServeHandlerInfo): RequestDigest {
   const url = new URL(req.url);
   return {
@@ -53,18 +62,18 @@ function getDigest(req: Request, ctx: Deno.ServeHandlerInfo): RequestDigest {
 }
 
 export class DenoGrafserv extends GrafservBase {
-  public async handler(req: Request, ctx: Deno.ServeHandlerInfo) {
+  handler = async (req: Request, ctx: Deno.ServeHandlerInfo) => {
     const digest = getDigest(req, ctx);
 
     const normalizedRequest = normalizeRequest(digest);
 
     const handlerResult = await this.graphqlHandler(
       normalizedRequest,
-      this.graphiqlHandler
+      this.graphiqlHandler,
     );
     const result = await convertHandlerResultToResult(handlerResult);
     return this.send(req, result);
-  }
+  };
 
   public send(_req: Request, result: Result | null) {
     if (result === null) return new Response(null, { status: 404 });
@@ -74,9 +83,9 @@ export class DenoGrafserv extends GrafservBase {
         console.error(result.error);
         return new Response(
           JSON.stringify(
-            Object.assign(result.error, { status: result.statusCode })
+            Object.assign(result.error, { status: result.statusCode }),
           ),
-          { status: result.statusCode, headers: result.headers }
+          { status: result.statusCode, headers: result.headers },
         );
       }
       case "buffer": {
